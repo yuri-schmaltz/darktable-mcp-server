@@ -75,56 +75,13 @@ class MCPGui(QMainWindow):
     def _apply_global_style(self) -> None:
         self.setStyleSheet(
             """
-            QWidget { font-size: 14px; color: #2c3e50; }
-            QMainWindow { background: #f8f9fb; }
-            QGroupBox {
-                font-weight: 600;
-                border: 1px solid #d9dee5;
-                border-radius: 8px;
-                margin-top: 10px;
-                padding: 12px;
-            }
-            QGroupBox::title {
-                subcontrol-origin: margin;
-                left: 10px;
-                padding: 0px 6px 0px 6px;
-                background: #f8f9fb;
-            }
-            QLabel { color: #34495e; }
-            QPushButton {
-                padding: 8px 14px;
-                min-height: 36px;
-                border-radius: 6px;
-                background-color: #1f7aec;
-                color: white;
-                border: 1px solid #1f6ad1;
-            }
-            QPushButton:hover { background-color: #1667c1; }
-            QPushButton:disabled { background-color: #cbd5e3; color: #f1f4f9; border-color: #cbd5e3; }
-            QLineEdit, QComboBox, QSpinBox {
-                padding: 8px 10px;
-                min-height: 34px;
-                border: 1px solid #cdd4e0;
-                border-radius: 6px;
-                background: white;
-            }
-            QLineEdit:focus, QComboBox:focus, QSpinBox:focus { border-color: #1f7aec; }
-            QTextEdit {
-                padding: 10px;
-                min-height: 180px;
-                font-family: "JetBrains Mono", "Fira Code", monospace;
-                border: 1px solid #cdd4e0;
-                border-radius: 8px;
-                background: #fbfcff;
-            }
+            QWidget { font-size: 14px; }
+            QGroupBox { font-weight: 600; }
+            QLabel { color: #2c3e50; }
+            QPushButton { padding: 6px 12px; min-height: 34px; }
+            QLineEdit, QComboBox, QSpinBox { padding: 6px; min-height: 32px; }
+            QTextEdit { padding: 8px; min-height: 140px; font-family: "JetBrains Mono", "Fira Code", monospace; }
             QCheckBox, QRadioButton { min-height: 28px; }
-            QProgressBar {
-                border: 1px solid #cdd4e0;
-                border-radius: 6px;
-                text-align: center;
-                background: #f1f4f9;
-                height: 18px;
-            }
             """
         )
 
