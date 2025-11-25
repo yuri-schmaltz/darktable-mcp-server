@@ -173,6 +173,17 @@ O log em `logs/batch-*.json` inclui a resposta bruta do modelo e metadados da ch
 - `export_collection` valida o diretório alvo e o formato (somente letras/números) e exige `darktable-cli`
   no `PATH`. A função registra no stderr cada export que falhar e retorna um resumo com eventuais erros em
   JSON para ajudar na depuração.
+- Em caso de falha, os hosts exibem a lista de erros individuais (id, exit code, comando, stderr) e anexam o
+  resultado completo no log gerado em `logs/`.
+  Exemplo de saída quando `darktable-cli` não está no `PATH`:
+
+  ```text
+  [export] Resultado export_collection: Exportadas 0 imagens para /tmp/out (1 falharam)
+  [export] Falhas detalhadas:
+    id=42 exit=127 reason=exit cmd=darktable-cli "/tmp/in/arquivo.nef" "/tmp/out/arquivo.jpg"
+      stderr: /bin/sh: 1: darktable-cli: not found
+  [export] Resultado de export salvo em log adicional: logs/batch-export-20240101-120000-export-result.json
+  ```
 
 ## Avaliação rápida da base
 
