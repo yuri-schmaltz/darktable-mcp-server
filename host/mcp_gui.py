@@ -106,6 +106,8 @@ class MCPGui(QMainWindow):
         self.host_ollama = QRadioButton("Ollama")
         self.host_ollama.setChecked(True)
         self.host_lmstudio = QRadioButton("LM Studio")
+        self.host_ollama.setToolTip("Usa o servidor Ollama para rodar o modelo configurado")
+        self.host_lmstudio.setToolTip("Usa o servidor do LM Studio para rodar o modelo configurado")
         self.host_group.addButton(self.host_ollama)
         self.host_group.addButton(self.host_lmstudio)
         host_layout = QHBoxLayout()
@@ -120,6 +122,9 @@ class MCPGui(QMainWindow):
         mode_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
         self.mode_combo = QComboBox()
         self.mode_combo.addItems(["rating", "tagging", "export"])
+        self.mode_combo.setToolTip(
+            "Escolha se deseja avaliar, etiquetar ou exportar as fotos selecionadas"
+        )
         top_layout.addWidget(mode_label, 1, 0)
         top_layout.addWidget(self.mode_combo, 1, 1)
 
@@ -127,6 +132,9 @@ class MCPGui(QMainWindow):
         source_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
         self.source_combo = QComboBox()
         self.source_combo.addItems(["all", "path", "tag"])
+        self.source_combo.setToolTip(
+            "Determina quais imagens serão consultadas: todas, por caminho ou por tag"
+        )
         top_layout.addWidget(source_label, 1, 2)
         top_layout.addWidget(self.source_combo, 1, 3)
 
@@ -136,6 +144,7 @@ class MCPGui(QMainWindow):
         self.min_rating_spin.setRange(-2, 5)
         self.min_rating_spin.setValue(DEFAULT_MIN_RATING)
         self.min_rating_spin.setFixedWidth(80)
+        self.min_rating_spin.setToolTip("Ignora fotos abaixo deste rating ao consultar a coleção")
         top_layout.addWidget(min_label, 2, 0)
         top_layout.addWidget(self.min_rating_spin, 2, 1)
 
@@ -145,6 +154,7 @@ class MCPGui(QMainWindow):
         self.limit_spin.setRange(1, 2000)
         self.limit_spin.setValue(DEFAULT_LIMIT)
         self.limit_spin.setFixedWidth(100)
+        self.limit_spin.setToolTip("Quantidade máxima de imagens retornadas pela busca")
         top_layout.addWidget(limit_label, 2, 2)
         top_layout.addWidget(self.limit_spin, 2, 3)
 
@@ -163,6 +173,9 @@ class MCPGui(QMainWindow):
         self.tag_edit = QLineEdit()
         self.prompt_edit = QLineEdit()
         self.target_edit = QLineEdit()
+        self.prompt_edit.setToolTip(
+            "Arquivo Markdown opcional para personalizar o prompt usado pelo LLM"
+        )
 
         self._add_form_row(filter_layout, 0, "Path contains:", self.path_contains_edit)
         self._add_form_row(filter_layout, 1, "Tag:", self.tag_edit)
@@ -182,6 +195,10 @@ class MCPGui(QMainWindow):
         self.only_raw_check = QCheckBox("Apenas RAW")
         self.dry_run_check = QCheckBox("Dry-run")
         self.dry_run_check.setChecked(True)
+        self.only_raw_check.setToolTip("Restringe a busca a arquivos RAW")
+        self.dry_run_check.setToolTip(
+            "Executa a ação sem alterar o catálogo do darktable, apenas simulando"
+        )
         flags_layout.addWidget(self.only_raw_check)
         flags_layout.addSpacing(12)
         flags_layout.addWidget(self.dry_run_check)
@@ -198,6 +215,8 @@ class MCPGui(QMainWindow):
 
         self.model_edit = QLineEdit()
         self.url_edit = QLineEdit()
+        self.model_edit.setToolTip("Nome do modelo carregado ou disponível no host selecionado")
+        self.url_edit.setToolTip("Endereço HTTP do servidor Ollama ou LM Studio em execução")
 
         self._add_form_row(llm_layout, 0, "Modelo:", self.model_edit)
         self._add_form_row(llm_layout, 1, "URL do servidor:", self.url_edit)
@@ -206,18 +225,24 @@ class MCPGui(QMainWindow):
         actions_layout.setSpacing(10)
         check_button = QPushButton("Verificar conectividade")
         check_button.clicked.connect(self.check_connectivity)
+        check_button.setToolTip("Testa se o host escolhido está respondendo no endereço informado")
         actions_layout.addWidget(check_button)
 
         list_button = QPushButton("Listar modelos")
         list_button.clicked.connect(self.list_models)
+        list_button.setToolTip("Consulta ao host quais modelos estão disponíveis para uso")
         actions_layout.addWidget(list_button)
 
         download_button = QPushButton("Baixar modelo")
         download_button.clicked.connect(self.download_model)
+        download_button.setToolTip("Inicia o download do modelo informado (apenas para Ollama)")
         actions_layout.addWidget(download_button)
 
         run_button = QPushButton("Executar host")
         run_button.clicked.connect(self.run_host)
+        run_button.setToolTip(
+            "Inicia o host com os parâmetros configurados e mostra os logs na área abaixo"
+        )
         actions_layout.addWidget(run_button)
         actions_layout.addStretch()
         llm_layout.addLayout(actions_layout, 2, 0, 1, 2)
@@ -228,12 +253,14 @@ class MCPGui(QMainWindow):
         status_layout.setSpacing(10)
         self.status_label = QLabel("Pronto para configurar a execução.")
         self.status_label.setWordWrap(True)
+        self.status_label.setToolTip("Mostra o estado atual das operações em andamento")
         status_layout.addWidget(self.status_label, alignment=Qt.AlignmentFlag.AlignLeft)
         self.progress = QProgressBar()
         self.progress.setFixedWidth(180)
         self.progress.setRange(0, 1)
         self.progress.setValue(0)
         self.progress.setTextVisible(False)
+        self.progress.setToolTip("Indica visualmente quando uma tarefa está em execução")
         status_layout.addWidget(self.progress)
         main_layout.addLayout(status_layout)
 
@@ -244,6 +271,7 @@ class MCPGui(QMainWindow):
         self.log_text = QTextEdit()
         self.log_text.setReadOnly(True)
         self.log_text.setLineWrapMode(QTextEdit.LineWrapMode.WidgetWidth)
+        self.log_text.setToolTip("Saída das operações e mensagens de debug geradas pelo host")
         clear_log = QPushButton("Limpar log")
         clear_log.setToolTip("Remove o conteúdo exibido acima")
         clear_log.clicked.connect(self.log_text.clear)
