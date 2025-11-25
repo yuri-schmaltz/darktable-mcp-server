@@ -113,6 +113,30 @@ local function command_exists(cmd)
   return result == true
 end
 
+local function run_command_capture(cmd)
+  local handle = io.popen(cmd .. " 2>&1")
+  if not handle then
+    return false, -1, "io.popen failed", "popen"
+  end
+
+  local output = handle:read("*a") or ""
+  local ok, reason, status = handle:close()
+
+  local success = (type(ok) == "number" and ok == 0) or ok == true
+  local exit_code = status
+  if not exit_code or type(exit_code) ~= "number" then
+    if type(ok) == "number" then
+      exit_code = ok
+    elseif ok == true then
+      exit_code = 0
+    else
+      exit_code = -1
+    end
+  end
+
+  return success, exit_code, output, reason
+end
+
 --------------------------------------------------
 -- 4. Ferramentas MCP (lado darktable)
 --------------------------------------------------
@@ -425,9 +449,7 @@ local function tool_export_collection(args)
 
     -- comando simples; ajuste flags conforme sua necessidade
     local cmd = string.format('darktable-cli "%s" "%s"', input, out)
-    local ok, _, status = os.execute(cmd)
-    local success = (type(ok) == "number" and ok == 0) or ok == true
-    local exit_code = status or ok
+    local success, exit_code, stderr_output, exit_reason = run_command_capture(cmd)
 
     if success then
       exported = exported + 1
@@ -438,11 +460,15 @@ local function tool_export_collection(args)
         output = out,
         command = cmd,
         exit = exit_code,
+        exit_reason = exit_reason,
+        stderr = stderr_output,
       })
       io.stderr:write(string.format(
-        "[export_collection] falha exportando id=%s exit=%s\n",
+        "[export_collection] falha exportando id=%s exit=%s motivo=%s stderr=%s\n",
         tostring(img.id),
-        tostring(exit_code)
+        tostring(exit_code),
+        tostring(exit_reason),
+        (stderr_output or ""):gsub("\n", " ")
       ))
     end
 
