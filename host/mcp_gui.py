@@ -270,9 +270,6 @@ class MCPGui(QMainWindow):
 
         url_row = self._add_form_row(llm_layout, 1, "URL do servidor:", self.url_edit)
 
-        actions_layout = QHBoxLayout()
-        actions_layout.setSpacing(12)
-
         check_button = QPushButton("Verificar conectividade")
         self._standardize_button(check_button)
         check_button.clicked.connect(self.check_connectivity)
@@ -289,14 +286,6 @@ class MCPGui(QMainWindow):
         download_button.clicked.connect(self.download_model)
         model_row.addWidget(download_button)
         model_row.addStretch()
-
-        run_button = QPushButton("Executar host")
-        self._standardize_button(run_button)
-        run_button.clicked.connect(self.run_host)
-        actions_layout.addWidget(run_button)
-
-        actions_layout.addStretch()
-        llm_layout.addLayout(actions_layout, 3, 0, 1, 2)
 
         main_layout.addWidget(llm_group)
 
@@ -334,8 +323,18 @@ class MCPGui(QMainWindow):
         self.progress.setTextVisible(False)
         self.progress.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
 
+        self.run_button = QPushButton("Executar host")
+        self._standardize_button(self.run_button)
+        self.run_button.clicked.connect(self.run_host)
+
+        progress_row = QHBoxLayout()
+        progress_row.setSpacing(12)
+        progress_row.addWidget(self.progress)
+        progress_row.addStretch()
+        progress_row.addWidget(self.run_button)
+
         progress_layout.addWidget(self.status_label)
-        progress_layout.addWidget(self.progress)
+        progress_layout.addLayout(progress_row)
 
         main_layout.addLayout(progress_layout)
 
