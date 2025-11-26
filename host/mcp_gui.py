@@ -587,52 +587,6 @@ class MCPGui(QMainWindow):
             if m.get("name")
         ]
 
-    def download_model(self) -> None:
-        def task() -> None:
-            host = self._selected_host()
-            if host != "ollama":
-                self._append_log("Download automático disponível apenas para Ollama.")
-                return
-
-            model = self.model_edit.text().strip() or OLLAMA_MODEL
-            url = self.url_edit.text().strip() or OLLAMA_URL
-
-            statuses = self._pull_ollama_model(model, url)
-            self._append_log(
-                f"Download de '{model}':\n- " + "\n- ".join(statuses)
-            )
-
-        self._run_async("Baixando modelo...", task)
-
-    def _pull_ollama_model(self, model: str, url: str) -> List[str]:
-        base = _base_url(url)
-        resp = requests.post(
-            f"{base}/api/pull",
-            json={"model": model},
-            stream=True,
-            timeout=5,
-        )
-        resp.raise_for_status()
-
-        statuses: List[str] = []
-        for line in resp.iter_lines():
-            if not line:
-                continue
-            try:
-                data = json.loads(line.decode("utf-8"))
-            except Exception:
-                continue
-
-            status = data.get("status") or data.get("message")
-            if status:
-                statuses.append(status)
-
-        if not statuses:
-            statuses.append(
-                "Download iniciado; acompanhe logs do Ollama para progresso."
-            )
-        return statuses
-
     def _list_lmstudio_models(self, url: str) -> List[str]:
         base = _base_url(url)
         resp = requests.get(f"{base}/v1/models", timeout=5)
