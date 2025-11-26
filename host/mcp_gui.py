@@ -150,7 +150,7 @@ class MCPGui(QMainWindow):
         top_layout.setHorizontalSpacing(14)
         top_layout.setVerticalSpacing(12)
 
-        # Linha: Modo / Fonte
+        # Linha: Modo / Fonte / Rating mínimo / Limite
         mode_label = QLabel("Modo:")
         mode_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
         self.mode_combo = QComboBox()
@@ -161,12 +161,6 @@ class MCPGui(QMainWindow):
         self.source_combo = QComboBox()
         self.source_combo.addItems(["all", "path", "tag", "collection"])
 
-        top_layout.addWidget(mode_label, 0, 0)
-        top_layout.addWidget(self.mode_combo, 0, 1)
-        top_layout.addWidget(source_label, 0, 2)
-        top_layout.addWidget(self.source_combo, 0, 3)
-
-        # Linha: Rating mínimo / Limite
         min_label = QLabel("Rating mínimo:")
         min_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
         self.min_rating_spin = QSpinBox()
@@ -181,10 +175,14 @@ class MCPGui(QMainWindow):
         self.limit_spin.setValue(DEFAULT_LIMIT)
         self.limit_spin.setFixedWidth(100)
 
-        top_layout.addWidget(min_label, 1, 0)
-        top_layout.addWidget(self.min_rating_spin, 1, 1)
-        top_layout.addWidget(limit_label, 1, 2)
-        top_layout.addWidget(self.limit_spin, 1, 3)
+        top_layout.addWidget(mode_label, 0, 0)
+        top_layout.addWidget(self.mode_combo, 0, 1)
+        top_layout.addWidget(source_label, 0, 2)
+        top_layout.addWidget(self.source_combo, 0, 3)
+        top_layout.addWidget(min_label, 0, 4)
+        top_layout.addWidget(self.min_rating_spin, 0, 5)
+        top_layout.addWidget(limit_label, 0, 6)
+        top_layout.addWidget(self.limit_spin, 0, 7)
 
         top_layout.setColumnStretch(1, 1)
         top_layout.setColumnStretch(3, 1)
