@@ -113,6 +113,10 @@ local function command_exists(cmd)
   return result == true
 end
 
+local function escape_format(s)
+  return tostring(s):gsub("%%", "%%%%")
+end
+
 local function run_command_capture(cmd)
   local handle = io.popen(cmd .. " 2>&1")
   if not handle then
@@ -487,7 +491,10 @@ local function tool_export_collection(args)
   end
 
   -- garantir que target_dir existe
-  os.execute(string.format('mkdir -p "%s"', target_dir))
+  -- string.format falha se o caminho contiver '%', então escapamos
+  local safe_target_dir = escape_format(target_dir)
+
+  os.execute(string.format('mkdir -p "%s"', safe_target_dir))
 
   -- montar lista de imagens a exportar
   local to_export = {}
@@ -513,7 +520,7 @@ local function tool_export_collection(args)
 
     -- mudar extensão de saída pro formato escolhido
     local base = img.filename:gsub("%.[^%.]+$", "") -- tira extensão
-    local out  = string.format("%s/%s.%s", target_dir, base, format)
+    local out  = string.format("%s/%s.%s", safe_target_dir, escape_format(base), format)
 
     if not overwrite then
       local f = io.open(out, "r")
@@ -525,7 +532,7 @@ local function tool_export_collection(args)
     end
 
     -- comando simples; ajuste flags conforme sua necessidade
-    local cmd = string.format('darktable-cli "%s" "%s"', input, out)
+      local cmd = string.format('darktable-cli "%s" "%s"', escape_format(input), out)
     local success, exit_code, stderr_output, exit_reason = run_command_capture(cmd)
 
     if success then
