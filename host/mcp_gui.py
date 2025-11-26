@@ -44,7 +44,7 @@ from PySide6.QtWidgets import (
 
 from interactive_cli import DEFAULT_LIMIT, DEFAULT_MIN_RATING, RunConfig
 from mcp_host_lmstudio import LMSTUDIO_MODEL, LMSTUDIO_URL
-from mcp_host_ollama import OLLAMA_MODEL, OLLAMA_URL
+from mcp_host_ollama import OLLAMA_MODEL, OLLAMA_URL, load_prompt as load_ollama_prompt
 
 
 def _base_url(full_url: str) -> str:
@@ -216,12 +216,23 @@ class MCPGui(QMainWindow):
         # Collection
         self._add_form_row(filter_layout, 2, "Coleção:", self.collection_edit)
 
-        # Prompt custom (+ botão Selecionar)
+        # Prompt custom (+ botões Selecionar / Gerar modelo)
         self._add_form_row(filter_layout, 3, "Prompt custom:", self.prompt_edit)
+        prompt_buttons = QHBoxLayout()
+        prompt_buttons.setSpacing(8)
+
         self.prompt_button = QPushButton("Selecionar")
         self._standardize_button(self.prompt_button)
         self.prompt_button.clicked.connect(self._choose_prompt_file)
-        filter_layout.addWidget(self.prompt_button, 3, 2)
+        prompt_buttons.addWidget(self.prompt_button)
+
+        self.prompt_generate_button = QPushButton("Gerar modelo")
+        self._standardize_button(self.prompt_generate_button)
+        self.prompt_generate_button.clicked.connect(self._generate_prompt_template)
+        prompt_buttons.addWidget(self.prompt_generate_button)
+
+        prompt_buttons.addStretch()
+        filter_layout.addLayout(prompt_buttons, 3, 2)
 
         # Dir export (+ botão Selecionar)
         self._add_form_row(filter_layout, 4, "Dir export:", self.target_edit)
@@ -379,6 +390,47 @@ class MCPGui(QMainWindow):
         )
         if path:
             self.prompt_edit.setText(path)
+
+    def _generate_prompt_template(self) -> None:
+        mode = self.mode_combo.currentText()
+        try:
+            template = load_ollama_prompt(mode)
+        except Exception as exc:  # pragma: no cover - apenas GUI
+            QMessageBox.critical(
+                self,
+                "Erro ao gerar modelo",
+                f"Não foi possível carregar o prompt padrão para '{mode}'.\n{exc}",
+            )
+            return
+
+        suggested = Path.home() / f"prompt_{mode}.md"
+        target, _ = QFileDialog.getSaveFileName(
+            self,
+            "Salvar modelo de prompt",
+            str(suggested),
+            "Markdown (*.md);;Todos (*.*)",
+        )
+        if not target:
+            return
+
+        try:
+            target_path = Path(target).expanduser()
+            target_path.write_text(template, encoding="utf-8")
+        except Exception as exc:  # pragma: no cover - apenas GUI
+            QMessageBox.critical(
+                self,
+                "Erro ao salvar",
+                f"Não foi possível salvar o modelo em '{target}'.\n{exc}",
+            )
+            return
+
+        self.prompt_edit.setText(str(target_path))
+        QMessageBox.information(
+            self,
+            "Modelo criado",
+            "Arquivo gerado a partir do prompt padrão do modo selecionado.\n"
+            "Você pode editá-lo e o caminho já foi preenchido no campo de prompt.",
+        )
 
     def _choose_target_dir(self) -> None:
         path = QFileDialog.getExistingDirectory(
