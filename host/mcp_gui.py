@@ -83,44 +83,88 @@ class MCPGui(QMainWindow):
     # --------------------------------------------------------------------- UI --
 
     def _apply_global_style(self) -> None:
-        # Estilo global bem neutro, só padronizando tamanhos e fontes
+        """Tema dark consistente e componentes padronizados."""
         self.setStyleSheet(
             """
+            /* BASE ----------------------------------------------------- */
             QWidget {
                 font-size: 13px;
-                background-color: #2f2f2f;
-                color: #e3e3e3;
+                background-color: #262626;
+                color: #f2f2f2;
             }
 
+            QMainWindow {
+                background-color: #262626;
+            }
+
+            QLabel {
+                color: #f2f2f2;
+            }
+
+            QToolTip {
+                background-color: #3a3a3a;
+                color: #f2f2f2;
+                border: 1px solid #555555;
+                padding: 4px 6px;
+            }
+
+            /* MENUS ---------------------------------------------------- */
+            QMenuBar {
+                background-color: #262626;
+                border-bottom: 1px solid #3a3a3a;
+            }
+
+            QMenuBar::item {
+                padding: 4px 10px;
+                background: transparent;
+            }
+
+            QMenuBar::item:selected {
+                background: #3a3a3a;
+            }
+
+            QMenu {
+                background-color: #2c2c2c;
+                border: 1px solid #444444;
+            }
+
+            QMenu::item {
+                padding: 4px 20px;
+            }
+
+            QMenu::item:selected {
+                background-color: #3a3a3a;
+            }
+
+            /* GROUPBOXES ---------------------------------------------- */
             QGroupBox {
                 font-weight: 600;
-                margin-top: 12px;
-                border: 1px solid #4a4a4a;
-                border-radius: 6px;
-                padding-top: 10px;
-                background-color: #3a3a3a;
+                margin-top: 16px;
+                border: 1px solid #444444;
+                border-radius: 8px;
+                padding: 10px 10px 12px 10px;
+                background-color: #303030;
             }
 
             QGroupBox::title {
                 subcontrol-origin: margin;
-                left: 10px;
+                left: 12px;
                 padding: 0 6px;
                 background-color: transparent;
             }
 
-            QLabel {
-                color: #e3e3e3;
-            }
-
+            /* CAMPOS DE TEXTO / INPUTS -------------------------------- */
             QLineEdit,
             QComboBox,
             QSpinBox,
             QTextEdit {
                 padding: 6px 8px;
                 min-height: 28px;
-                border: 1px solid #5a5a5a;
+                border: 1px solid #555555;
                 border-radius: 4px;
-                background-color: #3d3d3d;
+                background-color: #363636;
+                selection-background-color: #77a0ff;
+                selection-color: #ffffff;
             }
 
             QLineEdit:focus,
@@ -130,36 +174,132 @@ class MCPGui(QMainWindow):
                 border-color: #77a0ff;
             }
 
+            QLineEdit:disabled,
+            QComboBox:disabled,
+            QSpinBox:disabled {
+                background-color: #2c2c2c;
+                color: #888888;
+                border-color: #3a3a3a;
+            }
+
             QTextEdit {
                 min-height: 150px;
                 font-family: "JetBrains Mono", "Fira Code", monospace;
             }
 
+            /* BOTÕES --------------------------------------------------- */
             QPushButton {
-                padding: 8px 14px;
+                padding: 6px 14px;
                 min-height: 30px;
-                min-width: 140px;
-                background-color: #4a4a4a;
-                border: 1px solid #5a5a5a;
+                background-color: #3b3b3b;
+                border: 1px solid #555555;
                 border-radius: 6px;
                 color: #f0f0f0;
             }
 
             QPushButton:hover {
-                background-color: #5a5a5a;
+                background-color: #4a4a4a;
             }
 
             QPushButton:pressed {
-                background-color: #3f3f3f;
+                background-color: #333333;
             }
 
+            QPushButton:disabled {
+                background-color: #2a2a2a;
+                color: #777777;
+                border-color: #333333;
+            }
+
+            /* BOTÃO PRINCIPAL ----------------------------------------- */
+            QPushButton#primaryButton {
+                background-color: #336dff;
+                border-color: #4e82ff;
+                font-weight: 600;
+            }
+
+            QPushButton#primaryButton:hover {
+                background-color: #3f7dff;
+            }
+
+            QPushButton#primaryButton:pressed {
+                background-color: #295fdb;
+            }
+
+            QPushButton#primaryButton:disabled {
+                background-color: #2a2a2a;
+                border-color: #333333;
+                color: #777777;
+                font-weight: 500;
+            }
+
+            /* CHECKBOX / RADIO ---------------------------------------- */
             QCheckBox,
             QRadioButton {
+                spacing: 6px;
                 min-height: 22px;
             }
 
+            /* STATUSBAR / PROGRESS ------------------------------------ */
+            QStatusBar {
+                background-color: #262626;
+                border-top: 1px solid #3a3a3a;
+            }
+
             QProgressBar {
+                border: 1px solid #555555;
+                border-radius: 4px;
+                background-color: #333333;
+                text-align: center;
                 min-height: 16px;
+            }
+
+            QProgressBar::chunk {
+                border-radius: 3px;
+                background-color: #77a0ff;
+            }
+
+            /* SCROLLBARS ---------------------------------------------- */
+            QScrollBar:vertical {
+                background: #262626;
+                width: 12px;
+                margin: 0;
+            }
+
+            QScrollBar::handle:vertical {
+                background: #505050;
+                min-height: 24px;
+                border-radius: 6px;
+            }
+
+            QScrollBar::handle:vertical:hover {
+                background: #6a6a6a;
+            }
+
+            QScrollBar::add-line:vertical,
+            QScrollBar::sub-line:vertical {
+                height: 0;
+            }
+
+            QScrollBar:horizontal {
+                background: #262626;
+                height: 12px;
+                margin: 0;
+            }
+
+            QScrollBar::handle:horizontal {
+                background: #505050;
+                min-width: 24px;
+                border-radius: 6px;
+            }
+
+            QScrollBar::handle:horizontal:hover {
+                background: #6a6a6a;
+            }
+
+            QScrollBar::add-line:horizontal,
+            QScrollBar::sub-line:horizontal {
+                width: 0;
             }
             """
         )
@@ -448,7 +588,17 @@ class MCPGui(QMainWindow):
 
         # ----------------------------- Botão principal --------------------------
         self.run_button = QPushButton("Executar host")
+        # marcar como botão principal para o stylesheet
+        self.run_button.setObjectName("primaryButton")
+        # ícone de "play"
+        self.run_button.setIcon(
+            self.style().standardIcon(QStyle.StandardPixmap.SP_MediaPlay)
+        )
+
         self._standardize_button(self.run_button)
+        # deixar ele um pouco mais largo que os demais
+        self.run_button.setMinimumWidth(170)
+
         self.run_button.setToolTip("Inicia o host com os parâmetros configurados")
         self.run_button.clicked.connect(self.run_host)
 
