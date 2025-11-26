@@ -163,10 +163,17 @@ def parse_args():
         description="Host MCP para darktable + Ollama (rating/tagging/export)."
     )
     p.add_argument("--version", action="version", version=f"darktable-mcp-host {APP_VERSION}")
-    p.add_argument("--mode", choices=["rating", "tagging", "export"], default="rating")
-    p.add_argument("--source", choices=["all", "path", "tag"], default="all")
+    p.add_argument("--mode", choices=["rating", "tagging", "export", "tratamento"], default="rating")
+    p.add_argument("--source", choices=["all", "path", "tag", "collection"], default="all")
     p.add_argument("--path-contains", help="Filtro por trecho de path (source=path).")
     p.add_argument("--tag", help="Filtro por tag (source=tag).")
+    p.add_argument(
+        "--collection",
+        help=(
+            "Nome ou caminho da coleção (source=collection). Combine com --list-collections "
+            "para descobrir opções."
+        ),
+    )
     p.add_argument("--min-rating", type=int, default=-2, help="Rating mínimo.")
     p.add_argument("--only-raw", action="store_true", help="Apenas arquivos RAW.")
     p.add_argument("--dry-run", action="store_true", help="Não aplica, só mostra plano.")
@@ -198,6 +205,11 @@ def parse_args():
         action="store_true",
         help="Não envia a imagem ao modelo (modo texto/metadados).",
     )
+    p.add_argument(
+        "--list-collections",
+        action="store_true",
+        help="Lista coleções conhecidas no darktable e sai.",
+    )
     return p.parse_args()
 
 
@@ -210,6 +222,7 @@ def load_prompt(mode, prompt_file=None):
             "rating": "rating_basico.md",
             "tagging": "tagging_cliente.md",
             "export": "export_job.md",
+            "tratamento": "tratamento_basico.md",
         }
         fname = default_map.get(mode)
         if not fname:
@@ -303,6 +316,11 @@ def build_ollama_messages_for_images(
     return messages
 
 
+def list_available_collections(client):
+    res = client.call_tool("list_available_collections", {})
+    return res["content"][0]["json"]
+
+
 # --------- UTIL: buscar imagens ----------
 def fetch_images(client, args):
     params = {
@@ -312,6 +330,11 @@ def fetch_images(client, args):
 
     if args.source == "all":
         tool_name = "list_collection"
+    elif args.source == "collection":
+        tool_name = "list_collection"
+        if not args.collection:
+            raise ValueError("--collection é obrigatório quando source=collection")
+        params["collection_path"] = args.collection
     elif args.source == "path":
         tool_name = "list_by_path"
         if not args.path_contains:
@@ -513,6 +536,52 @@ def run_mode_tagging(client, args):
     print(f"[tagging] tag_batch executado {total_ops} vez(es).")
 
 
+def run_mode_tratamento(client, args):
+    images = fetch_images(client, args)
+    print(f"[tratamento] Imagens filtradas: {len(images)}")
+
+    if not images:
+        print("Nada para processar.")
+        return
+
+    sample = images[: args.limit]
+    system_prompt = load_prompt("tratamento", args.prompt_file)
+    vision_images, vision_errors = prepare_vision_payloads(sample, attach_images=not args.text_only)
+
+    if vision_errors:
+        print("[tratamento] Avisos ao carregar imagens:")
+        for warn in vision_errors:
+            print("  -", warn)
+
+    messages = build_ollama_messages_for_images(system_prompt, sample, vision_images)
+    answer = call_ollama_messages(
+        messages,
+        model=args.model or OLLAMA_MODEL,
+        url=args.ollama_url or OLLAMA_URL,
+    )
+
+    print("[tratamento] Resposta bruta do modelo:")
+    print(answer)
+
+    log_file = save_log(
+        "tratamento",
+        args.source,
+        sample,
+        answer,
+        extra={
+            "vision": {
+                "attached": len(vision_images),
+                "errors": vision_errors,
+                "mode": "text-only" if args.text_only else "multimodal",
+            }
+        },
+    )
+    print(f"[tratamento] Log salvo em: {log_file}")
+
+    if args.dry_run:
+        print("[tratamento] DRY-RUN: mantendo somente a sugestão do modelo.")
+
+
 def run_mode_export(client, args):
     if not args.target_dir:
         raise ValueError("--target-dir é obrigatório em --mode export")
@@ -656,12 +725,25 @@ def main():
         names = [t["name"] for t in tools["tools"]]
         print("Ferramentas MCP disponíveis:", ", ".join(names))
 
+        if args.list_collections:
+            available = list_available_collections(client)
+            print("Coleções conhecidas (path -> imagens):")
+            for entry in available:
+                print(
+                    f"  - {entry.get('path')}"
+                    f" ({entry.get('image_count', 0)} imagens)"
+                    + (f" [filme: {entry.get('film_roll')}]" if entry.get("film_roll") else "")
+                )
+            return
+
         if args.mode == "rating":
             run_mode_rating(client, args)
         elif args.mode == "tagging":
             run_mode_tagging(client, args)
         elif args.mode == "export":
             run_mode_export(client, args)
+        elif args.mode == "tratamento":
+            run_mode_tratamento(client, args)
         else:
             print("Modo desconhecido:", args.mode)
 

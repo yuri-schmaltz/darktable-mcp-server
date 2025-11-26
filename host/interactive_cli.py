@@ -30,6 +30,7 @@ class RunConfig:
     source: str
     path_contains: Optional[str] = None
     tag: Optional[str] = None
+    collection: Optional[str] = None
     min_rating: int = DEFAULT_MIN_RATING
     only_raw: bool = False
     dry_run: bool = True
@@ -54,6 +55,8 @@ class RunConfig:
             cmd += ["--path-contains", self.path_contains]
         if self.source == "tag" and self.tag:
             cmd += ["--tag", self.tag]
+        if self.source == "collection" and self.collection:
+            cmd += ["--collection", self.collection]
 
         cmd += ["--min-rating", str(self.min_rating), "--limit", str(self.limit)]
 
@@ -123,11 +126,12 @@ def _ask_optional_str(prompt: str) -> Optional[str]:
 def gather_config() -> RunConfig:
     print("=== darktable-mcp interface interativa ===")
     host = _ask_choice("Escolha o host LLM", ["ollama", "lmstudio"], default="ollama")
-    mode = _ask_choice("Modo", ["rating", "tagging", "export"], default="rating")
-    source = _ask_choice("Fonte", ["all", "path", "tag"], default="all")
+    mode = _ask_choice("Modo", ["rating", "tagging", "export", "tratamento"], default="rating")
+    source = _ask_choice("Fonte", ["all", "path", "tag", "collection"], default="all")
 
     path_contains = None
     tag = None
+    collection = None
     if source == "path":
         path_contains = _ask_optional_str("Trecho de caminho para filtrar (--path-contains)")
         if not path_contains:
@@ -136,6 +140,10 @@ def gather_config() -> RunConfig:
         tag = _ask_optional_str("Tag para filtrar (--tag)")
         if not tag:
             raise SystemExit("--tag é obrigatório quando source=tag")
+    elif source == "collection":
+        collection = _ask_optional_str("Coleção/caminho para filtrar (--collection)")
+        if not collection:
+            raise SystemExit("--collection é obrigatório quando source=collection")
 
     min_rating = _ask_int("Rating mínimo", DEFAULT_MIN_RATING)
     limit = _ask_int("Limite de imagens enviadas ao modelo", DEFAULT_LIMIT)
@@ -173,6 +181,7 @@ def gather_config() -> RunConfig:
         source=source,
         path_contains=path_contains,
         tag=tag,
+        collection=collection,
         min_rating=min_rating,
         only_raw=only_raw,
         dry_run=dry_run,
@@ -204,6 +213,8 @@ def main() -> None:
         print(f"  path-contains: {config.path_contains}")
     if config.tag:
         print(f"  tag: {config.tag}")
+    if config.collection:
+        print(f"  collection: {config.collection}")
     print(f"Rating mínimo: {config.min_rating}")
     print(f"Limit: {config.limit}")
     print(f"Apenas RAW: {'sim' if config.only_raw else 'não'}")

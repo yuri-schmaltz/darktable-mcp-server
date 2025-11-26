@@ -149,12 +149,12 @@ class MCPGui(QMainWindow):
         mode_label = QLabel("Modo:")
         mode_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
         self.mode_combo = QComboBox()
-        self.mode_combo.addItems(["rating", "tagging", "export"])
+        self.mode_combo.addItems(["rating", "tagging", "export", "tratamento"])
 
         source_label = QLabel("Fonte:")
         source_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
         self.source_combo = QComboBox()
-        self.source_combo.addItems(["all", "path", "tag"])
+        self.source_combo.addItems(["all", "path", "tag", "collection"])
 
         top_layout.addWidget(mode_label, 0, 0)
         top_layout.addWidget(self.mode_combo, 0, 1)
@@ -200,6 +200,7 @@ class MCPGui(QMainWindow):
 
         self.path_contains_edit = QLineEdit()
         self.tag_edit = QLineEdit()
+        self.collection_edit = QLineEdit()
         self.prompt_edit = QLineEdit()
         self.target_edit = QLineEdit()
 
@@ -209,19 +210,22 @@ class MCPGui(QMainWindow):
         # Tag
         self._add_form_row(filter_layout, 1, "Tag:", self.tag_edit)
 
+        # Collection
+        self._add_form_row(filter_layout, 2, "Coleção:", self.collection_edit)
+
         # Prompt custom (+ botão Selecionar)
-        self._add_form_row(filter_layout, 2, "Prompt custom:", self.prompt_edit)
+        self._add_form_row(filter_layout, 3, "Prompt custom:", self.prompt_edit)
         self.prompt_button = QPushButton("Selecionar")
         self._standardize_button(self.prompt_button)
         self.prompt_button.clicked.connect(self._choose_prompt_file)
-        filter_layout.addWidget(self.prompt_button, 2, 2)
+        filter_layout.addWidget(self.prompt_button, 3, 2)
 
         # Dir export (+ botão Selecionar)
-        self._add_form_row(filter_layout, 3, "Dir export:", self.target_edit)
+        self._add_form_row(filter_layout, 4, "Dir export:", self.target_edit)
         self.target_button = QPushButton("Selecionar")
         self._standardize_button(self.target_button)
         self.target_button.clicked.connect(self._choose_target_dir)
-        filter_layout.addWidget(self.target_button, 3, 2)
+        filter_layout.addWidget(self.target_button, 4, 2)
 
         # Checkboxes
         flags_layout = QHBoxLayout()
@@ -237,7 +241,7 @@ class MCPGui(QMainWindow):
         flags_layout.addStretch()
 
         # ocupa as três colunas (label + campo + botão)
-        filter_layout.addLayout(flags_layout, 4, 0, 1, 3)
+        filter_layout.addLayout(flags_layout, 5, 0, 1, 3)
 
         main_layout.addWidget(filter_group)
 
@@ -424,9 +428,11 @@ class MCPGui(QMainWindow):
     def _update_source_fields(self, source: str) -> None:
         is_path = source == "path"
         is_tag = source == "tag"
+        is_collection = source == "collection"
 
         self.path_contains_edit.setEnabled(is_path)
         self.tag_edit.setEnabled(is_tag)
+        self.collection_edit.setEnabled(is_collection)
 
         self.path_contains_edit.setToolTip(
             "Filtrar apenas por caminho contendo este trecho"
@@ -437,6 +443,11 @@ class MCPGui(QMainWindow):
             "Tag existente no darktable"
             if is_tag
             else "Disponível somente quando a fonte for 'tag'"
+        )
+        self.collection_edit.setToolTip(
+            "Coleção/pasta já presente no darktable"
+            if is_collection
+            else "Disponível somente quando a fonte for 'collection'"
         )
 
     def _update_mode_fields(self, mode: str) -> None:
@@ -636,6 +647,7 @@ class MCPGui(QMainWindow):
 
         path_contains = self.path_contains_edit.text().strip() or None
         tag = self.tag_edit.text().strip() or None
+        collection = self.collection_edit.text().strip() or None
 
         prompt_file_input = self.prompt_edit.text().strip() or None
         prompt_file = Path(prompt_file_input).expanduser() if prompt_file_input else None
@@ -646,6 +658,8 @@ class MCPGui(QMainWindow):
             raise ValueError("'Path contains' é obrigatório quando a fonte é 'path'.")
         if source == "tag" and not tag:
             raise ValueError("Tag é obrigatória quando a fonte é 'tag'.")
+        if source == "collection" and not collection:
+            raise ValueError("Coleção é obrigatória quando a fonte é 'collection'.")
         if mode == "export" and not target_dir:
             raise ValueError("Diretório de export é obrigatório em modo export.")
 
@@ -658,6 +672,7 @@ class MCPGui(QMainWindow):
             source=source,
             path_contains=path_contains,
             tag=tag,
+            collection=collection,
             min_rating=int(self.min_rating_spin.value()),
             only_raw=bool(self.only_raw_check.isChecked()),
             dry_run=bool(self.dry_run_check.isChecked()),

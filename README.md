@@ -160,6 +160,9 @@ abaixo corresponde a um parâmetro aceito pelos hosts de linha de comando:
 7. **Filtre o conjunto de fotos**
    - `--source path --path-contains <trecho>` para restringir por caminho.
    - `--source tag --tag <nome>` para filtrar por tag existente.
+   - `--source collection --collection <caminho>` para trabalhar com uma
+     coleção/pasta específica listada pelo darktable (`--list-collections`
+     mostra as opções conhecidas).
    - Combine com `--min-rating` e `--only-raw` para limitar envio ao modelo.
 
 8. **Rodando para cada modo**
