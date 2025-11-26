@@ -18,14 +18,8 @@ DT_SERVER_CMD = ["lua", str(BASE_DIR / "server" / "dt_mcp_server.lua")]
 
 # Config padrão do Ollama
 OLLAMA_URL = "http://localhost:11434"
-OLLAMA_MODEL = "llama3.1"  # ajuste pro modelo que você tiver
-POPULAR_MODELS = [
-    "llama3.2",
-    "llama3.1",
-    "phi3",
-    "mistral",
-    "gemma2",
-]
+OLLAMA_MODEL = ""
+
 PROTOCOL_VERSION = "2024-11-05"
 APP_VERSION = "0.2.0"
 CLIENT_INFO = {"name": "darktable-mcp-ollama", "version": APP_VERSION}
@@ -181,13 +175,6 @@ def parse_args():
     p.add_argument("--model", help="Nome do modelo no Ollama.")
     p.add_argument("--ollama-url", help="URL do servidor Ollama.")
     p.add_argument(
-        "--download-model",
-        help=(
-            "Baixa um modelo no Ollama antes de executar. Exemplos populares: "
-            + ", ".join(POPULAR_MODELS)
-        ),
-    )
-    p.add_argument(
         "--target-dir",
         help="Diretório de saída para export (obrigatório em --mode export).",
     )
@@ -212,7 +199,6 @@ def parse_args():
     )
     return p.parse_args()
 
-
 # --------- UTIL: carregar prompt ---------
 def load_prompt(mode, prompt_file=None):
     if prompt_file:
@@ -232,7 +218,6 @@ def load_prompt(mode, prompt_file=None):
     if not path.exists():
         raise FileNotFoundError(f"Prompt não encontrado: {path}")
     return path.read_text(encoding="utf-8")
-
 
 
 # --------- UTIL: multimodal / imagens ----------
