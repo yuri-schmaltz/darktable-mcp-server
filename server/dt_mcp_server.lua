@@ -147,7 +147,7 @@ end
 
 --------------------------------------------------
 -- 4.1 list_collection
--- args: { min_rating?: number, only_raw?: boolean }
+-- args: { min_rating?: number, only_raw?: boolean, collection_path?: string }
 --------------------------------------------------
 local function tool_list_collection(args)
   args = args or {}
@@ -155,20 +155,70 @@ local function tool_list_collection(args)
     return mcp_error("min_rating deve ser numérico", "invalid_min_rating", "min_rating")
   end
 
+  if args.collection_path ~= nil and type(args.collection_path) ~= "string" then
+    return mcp_error("collection_path deve ser string", "invalid_collection_path", "collection_path")
+  end
+
   if args.only_raw ~= nil and type(args.only_raw) ~= "boolean" then
     return mcp_error("only_raw deve ser booleano", "invalid_only_raw", "only_raw")
   end
 
-  local min_rating = args.min_rating or -2
-  local only_raw   = args.only_raw or false
+  local min_rating      = args.min_rating or -2
+  local only_raw        = args.only_raw or false
+  local collection_path = args.collection_path
 
   local result = {}
 
   for _, img in ipairs(dt.database) do
-    if (not only_raw or img.is_raw) and (img.rating or 0) >= min_rating then
+    local path_ok = true
+    if collection_path and img.path then
+      path_ok = img.path:find(collection_path, 1, true) ~= nil
+    end
+
+    if path_ok and (not only_raw or img.is_raw) and (img.rating or 0) >= min_rating then
       table.insert(result, image_to_metadata(img))
     end
   end
+
+  return {
+    content = {
+      { type = "json", json = result }
+    },
+    isError = false
+  }
+end
+
+--------------------------------------------------
+-- 4.1b list_available_collections
+-- args: {}
+--------------------------------------------------
+local function tool_list_available_collections(args)
+  local groups = {}
+
+  for _, img in ipairs(dt.database) do
+    local path = img.path or ""
+    local film = img.film and img.film.roll_name or nil
+
+    if path ~= "" then
+      if not groups[path] then
+        groups[path] = { count = 0, film = film }
+      end
+      groups[path].count = groups[path].count + 1
+    end
+  end
+
+  local result = {}
+  for path, meta in pairs(groups) do
+    table.insert(result, {
+      path = path,
+      film_roll = meta.film,
+      image_count = meta.count
+    })
+  end
+
+  table.sort(result, function(a, b)
+    return a.path < b.path
+  end)
 
   return {
     content = {
@@ -613,7 +663,7 @@ local function handle_tools_list(req)
     {
       name        = "list_collection",
       title       = "Listar coleção do darktable",
-      description = "Lista imagens da biblioteca com filtros simples (min_rating, only_raw).",
+      description = "Lista imagens da biblioteca com filtros simples (min_rating, only_raw, collection_path).",
       inputSchema = {
         type       = "object",
         properties = {
@@ -624,8 +674,21 @@ local function handle_tools_list(req)
           only_raw = {
             type        = "boolean",
             description = "Se true, retorna apenas arquivos RAW."
+          },
+          collection_path = {
+            type        = "string",
+            description = "Filtra por um caminho de coleção (match direto em img.path)."
           }
         }
+      }
+    },
+    {
+      name        = "list_available_collections",
+      title       = "Listar coleções disponíveis",
+      description = "Retorna caminhos de coleção/folder conhecidos e o número de imagens em cada um.",
+      inputSchema = {
+        type = "object",
+        properties = {}
       }
     },
     {
@@ -798,6 +861,8 @@ local function handle_tools_call(req)
 
   if name == "list_collection" then
     result = tool_list_collection(args)
+  elseif name == "list_available_collections" then
+    result = tool_list_available_collections(args)
   elseif name == "list_by_path" then
     result = tool_list_by_path(args)
   elseif name == "list_by_tag" then
