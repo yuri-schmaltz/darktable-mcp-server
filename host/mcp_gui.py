@@ -392,6 +392,17 @@ class MCPGui(QMainWindow):
         quit_action.triggered.connect(self.close)
         file_menu.addAction(quit_action)
 
+        help_menu = menu_bar.addMenu("Ajuda")
+
+        help_action = QAction(self.style().standardIcon(QStyle.SP_MessageBoxQuestion), "Manual de uso", self)
+        help_action.setShortcut("F1")
+        help_action.triggered.connect(self._show_help_manual)
+        help_menu.addAction(help_action)
+
+        about_action = QAction(self.style().standardIcon(QStyle.SP_TitleBarMenuButton), "Sobre", self)
+        about_action.triggered.connect(self._show_about_dialog)
+        help_menu.addAction(about_action)
+
     def _build_status_bar(self) -> None:
         status_bar = QStatusBar()
         status_bar.setSizeGripEnabled(False)
@@ -437,6 +448,50 @@ class MCPGui(QMainWindow):
         layout.addLayout(widget_layout, row, 1)
 
         return widget_layout
+
+    # ------------------------------ MENUS DE AJUDA -----------------------------
+    def _show_help_manual(self) -> None:
+        manual_text = (
+            """
+            Fluxo geral:
+            1) Escolha o host LLM (Ollama ou LM Studio).
+            2) Defina o modo: rating, tagging, export ou tratamento.
+            3) Selecione a fonte: todas as imagens, filtro por caminho, tag ou coleção.
+            4) Ajuste rating mínimo, limite de imagens e se deseja apenas RAW.
+            5) Configure modelo, URL do servidor e prompt personalizado se necessário.
+            6) Em export, informe o diretório de destino.
+            7) Clique em "Executar host" e acompanhe o log.
+
+            Dicas rápidas:
+            - Ative "Dry-run" para validar parâmetros sem alterar nada.
+            - Marque "Somente texto/metadados" para desabilitar envio de imagens.
+            - O botão "Checar host" testa conectividade com o servidor LLM.
+            - Use "Listar modelos" para carregar modelos disponíveis do servidor.
+            """
+        )
+
+        QMessageBox.information(
+            self,
+            "Manual de uso",
+            manual_text,
+        )
+
+    def _show_about_dialog(self) -> None:
+        about_text = (
+            """
+            darktable MCP GUI
+
+            Orquestrador gráfico para hosts MCP integrados ao darktable.
+            Permite configurar execuções com Ollama ou LM Studio,
+            enviar coleções de imagens, aplicar ratings/tags e
+            monitorar o progresso em tempo real.
+
+            Repositório: https://github.com/darktable-mcp
+            Licença: MIT
+            """
+        )
+
+        QMessageBox.about(self, "Sobre o aplicativo", about_text)
 
     def _standardize_button(self, button: QPushButton) -> None:
         button.setMinimumWidth(120)
