@@ -164,6 +164,7 @@ class MCPGui(QMainWindow):
             """
         )
 
+
     def _build_layout(self) -> None:
         central = QWidget()
         self.setCentralWidget(central)
@@ -177,8 +178,8 @@ class MCPGui(QMainWindow):
         top_group.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         top_layout = QFormLayout(top_group)
-        top_layout.setContentsMargins(16, 14, 16, 18)
-        top_layout.setHorizontalSpacing(16)
+        top_layout.setContentsMargins(18, 12, 18, 12)
+        top_layout.setHorizontalSpacing(14)
         top_layout.setVerticalSpacing(8)
         top_layout.setLabelAlignment(
             Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
@@ -222,8 +223,8 @@ class MCPGui(QMainWindow):
         filter_group.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         filter_layout = QFormLayout(filter_group)
-        filter_layout.setContentsMargins(16, 16, 16, 18)
-        filter_layout.setHorizontalSpacing(16)
+        filter_layout.setContentsMargins(18, 12, 18, 12)
+        filter_layout.setHorizontalSpacing(14)
         filter_layout.setVerticalSpacing(8)
         filter_layout.setLabelAlignment(
             Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
@@ -338,8 +339,8 @@ class MCPGui(QMainWindow):
         llm_group.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         llm_layout = QFormLayout(llm_group)
-        llm_layout.setContentsMargins(16, 16, 16, 18)
-        llm_layout.setHorizontalSpacing(16)
+        llm_layout.setContentsMargins(18, 12, 18, 12)
+        llm_layout.setHorizontalSpacing(14)
         llm_layout.setVerticalSpacing(8)
         llm_layout.setLabelAlignment(
             Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
@@ -425,8 +426,8 @@ class MCPGui(QMainWindow):
         log_group.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         log_layout = QVBoxLayout(log_group)
-        log_layout.setContentsMargins(16, 16, 16, 18)
-        log_layout.setSpacing(14)
+        log_layout.setContentsMargins(18, 12, 18, 12)
+        log_layout.setSpacing(10)
 
         self.log_text = QTextEdit()
         self.log_text.setReadOnly(True)
@@ -486,6 +487,7 @@ class MCPGui(QMainWindow):
     def _build_status_bar(self) -> None:
         status_bar = QStatusBar()
         status_bar.setSizeGripEnabled(False)
+        status_bar.setContentsMargins(8, 0, 8, 0)
 
         self.status_label = QLabel("Pronto para configurar a execução.")
         self.status_label.setMinimumWidth(260)
