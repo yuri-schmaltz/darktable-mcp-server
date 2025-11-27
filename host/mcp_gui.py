@@ -447,16 +447,6 @@ class MCPGui(QMainWindow):
         self._style_form_field(self.url_edit)
         self._style_form_field(self.model_combo)
 
-        llm_form = QFormLayout()
-        llm_form.setContentsMargins(0, 0, 0, 0)
-        llm_form.setHorizontalSpacing(12)
-        llm_form.setVerticalSpacing(5)
-        llm_form.setLabelAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-        llm_form.addRow("URL:", self.url_edit)
-        llm_form.addRow("Modelo:", self.model_combo)
-
-        llm_layout.addLayout(llm_form)
-
         actions_widget = QWidget()
         actions_layout = QHBoxLayout(actions_widget)
         actions_layout.setContentsMargins(0, 4, 0, 0)
@@ -478,17 +468,25 @@ class MCPGui(QMainWindow):
         check_button.setFixedSize(44, 34)
         check_button.clicked.connect(self.check_connectivity)
 
-        actions_layout.addStretch()
         actions_layout.addWidget(list_button)
         actions_layout.addWidget(check_button)
 
-        actions_row = QFormLayout()
-        actions_row.setContentsMargins(0, 0, 0, 0)
-        actions_row.setHorizontalSpacing(12)
-        actions_row.setLabelAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-        actions_row.addRow("Ações do host:", actions_widget)
+        model_row_widget = QWidget()
+        model_row_layout = QHBoxLayout(model_row_widget)
+        model_row_layout.setContentsMargins(0, 0, 0, 0)
+        model_row_layout.setSpacing(10)
+        model_row_layout.addWidget(self.model_combo, stretch=1)
+        model_row_layout.addWidget(actions_widget)
 
-        llm_layout.addLayout(actions_row)
+        llm_form = QFormLayout()
+        llm_form.setContentsMargins(0, 0, 0, 0)
+        llm_form.setHorizontalSpacing(12)
+        llm_form.setVerticalSpacing(5)
+        llm_form.setLabelAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        llm_form.addRow("URL:", self.url_edit)
+        llm_form.addRow("Modelo:", model_row_widget)
+
+        llm_layout.addLayout(llm_form)
 
         form_column.addWidget(llm_group)
 
