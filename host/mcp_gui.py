@@ -143,8 +143,8 @@ class MCPGui(QMainWindow):
             QComboBox,
             QSpinBox,
             QTextEdit {
-                padding: 6px 8px;
-                min-height: 28px;
+                padding: 4.5px 6px;
+                min-height: 21px;
                 border: 1px solid #555555;
                 border-radius: 4px;
                 background-color: #363636;
