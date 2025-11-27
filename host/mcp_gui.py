@@ -269,12 +269,15 @@ class MCPGui(QMainWindow):
         config_layout.setContentsMargins(18, 14, 18, 14)
         config_layout.setSpacing(16)
 
-        top_layout = QFormLayout()
-        top_layout.setContentsMargins(0, 0, 0, 0)
-        top_layout.setHorizontalSpacing(16)
-        top_layout.setVerticalSpacing(12)
-        top_layout.setLabelAlignment(
+        config_form = QFormLayout()
+        config_form.setContentsMargins(0, 0, 0, 0)
+        config_form.setHorizontalSpacing(16)
+        config_form.setVerticalSpacing(12)
+        config_form.setLabelAlignment(
             Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
+        )
+        config_form.setFormAlignment(
+            Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop
         )
 
         self.mode_combo = QComboBox()
@@ -303,22 +306,12 @@ class MCPGui(QMainWindow):
             "Quantidade máxima de imagens processadas nesta execução"
         )
 
-        top_layout.addRow("Modo:", self.mode_combo)
-        top_layout.addRow("Fonte:", self.source_combo)
-        top_layout.addRow("Rating mínimo:", self.min_rating_spin)
-        top_layout.addRow("Limite:", self.limit_spin)
-
-        config_layout.addLayout(top_layout)
+        config_form.addRow("Modo:", self.mode_combo)
+        config_form.addRow("Fonte:", self.source_combo)
+        config_form.addRow("Rating mínimo:", self.min_rating_spin)
+        config_form.addRow("Limite:", self.limit_spin)
 
     # -------------------------- Seção: Filtros e opções ---------------------
-        
-        filter_layout = QFormLayout()
-        filter_layout.setContentsMargins(0, 0, 0, 0)
-        filter_layout.setHorizontalSpacing(16)
-        filter_layout.setVerticalSpacing(12)
-        filter_layout.setLabelAlignment(
-            Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
-        )
 
         self.path_contains_edit = QLineEdit()
         self.tag_edit = QLineEdit()
@@ -340,9 +333,9 @@ class MCPGui(QMainWindow):
         ):
             self._style_form_field(w)
 
-        filter_layout.addRow("Path contém:", self.path_contains_edit)
-        filter_layout.addRow("Tag:", self.tag_edit)
-        filter_layout.addRow("Coleção:", self.collection_edit)
+        config_form.addRow("Path contém:", self.path_contains_edit)
+        config_form.addRow("Tag:", self.tag_edit)
+        config_form.addRow("Coleção:", self.collection_edit)
 
         # Prompt custom + botões
         prompt_row_widget = QWidget()
@@ -363,7 +356,7 @@ class MCPGui(QMainWindow):
 
         prompt_row_layout.addStretch()
 
-        filter_layout.addRow("Prompt personalizado:", prompt_row_widget)
+        config_form.addRow("Prompt personalizado:", prompt_row_widget)
 
         # Dir export + botão
         target_row_widget = QWidget()
@@ -381,7 +374,7 @@ class MCPGui(QMainWindow):
         target_row_layout.addWidget(self.target_button)
         target_row_layout.addStretch()
 
-        filter_layout.addRow("Dir export:", target_row_widget)
+        config_form.addRow("Dir export:", target_row_widget)
 
         # Checkboxes (Apenas RAW / Dry-run)
         flags_widget = QWidget()
@@ -404,9 +397,9 @@ class MCPGui(QMainWindow):
         flags_layout.addWidget(self.dry_run_check)
         flags_layout.addStretch()
 
-        filter_layout.addRow("Execução:", flags_widget)
+        config_form.addRow("Execução:", flags_widget)
 
-        config_layout.addLayout(filter_layout)
+        config_layout.addLayout(config_form)
 
     # ------------------------------- Seção LLM ------------------------------
         
