@@ -623,6 +623,13 @@ class MCPGui(QMainWindow):
         button.setMinimumWidth(120)
         button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
+    def _style_form_field(self, widget: QWidget) -> None:
+        """Padroniza campos de formulário para largura e altura consistentes."""
+
+        widget.setMinimumWidth(220)
+        widget.setMinimumHeight(30)
+        widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+
     # ----------------------------------------------------------------- Defaults --
 
     def _choose_prompt_file(self) -> None:
