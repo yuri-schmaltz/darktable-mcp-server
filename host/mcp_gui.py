@@ -60,6 +60,7 @@ class MCPGui(QMainWindow):
     status_signal = Signal(str)
     progress_signal = Signal(bool)
     error_signal = Signal(str)
+    models_signal = Signal(list)
 
     def __init__(self) -> None:
         super().__init__()
@@ -73,6 +74,7 @@ class MCPGui(QMainWindow):
         self.status_signal.connect(self._set_status_ui)
         self.progress_signal.connect(self._toggle_progress)
         self.error_signal.connect(self._show_error)
+        self.models_signal.connect(self._populate_model_choices)
 
         self._apply_global_style()
         self._build_menu_bar()
@@ -507,13 +509,14 @@ class MCPGui(QMainWindow):
 
         llm_layout.addRow("Framework:", host_widget)
 
-        self.model_edit = QLineEdit()
+        self.model_combo = QComboBox()
+        self.model_combo.setEditable(True)
         self.url_edit = QLineEdit()
         self.url_edit.setToolTip("URL base do servidor LLM escolhido")
-        self.model_edit.setToolTip("Nome do modelo carregado no servidor selecionado")
+        self.model_combo.setToolTip("Nome do modelo carregado no servidor selecionado")
 
         self._style_form_field(self.url_edit)
-        self._style_form_field(self.model_edit)
+        self._style_form_field(self.model_combo)
 
         url_model_widget = QWidget()
         url_model_layout = QHBoxLayout(url_model_widget)
@@ -527,7 +530,7 @@ class MCPGui(QMainWindow):
         url_model_layout.addWidget(self.url_edit)
         url_model_layout.addSpacing(8)
         url_model_layout.addWidget(lbl_model)
-        url_model_layout.addWidget(self.model_edit)
+        url_model_layout.addWidget(self.model_combo)
         url_model_layout.addStretch()
 
         llm_layout.addRow("Servidor:", url_model_widget)
@@ -655,7 +658,7 @@ class MCPGui(QMainWindow):
         status_bar.addPermanentWidget(self.progress)
         self.setStatusBar(status_bar)
 
-    def _style_form_field(self, widget: QLineEdit) -> None:
+    def _style_form_field(self, widget: QWidget) -> None:
         widget.setMinimumWidth(260)
         widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
 
@@ -664,7 +667,7 @@ class MCPGui(QMainWindow):
         layout: QGridLayout,
         row: int,
         label_text: str,
-        widget: QLineEdit,
+        widget: QWidget,
     ) -> QHBoxLayout:
         label = QLabel(label_text)
         label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
@@ -795,7 +798,8 @@ class MCPGui(QMainWindow):
         self.tag_edit.setPlaceholderText("job:cliente")
         self.prompt_edit.setPlaceholderText("Arquivo .md opcional com prompt customizado")
         self.target_edit.setPlaceholderText("Diretório de export (apenas modo export)")
-        self.model_edit.setPlaceholderText("Nome do modelo disponível no host")
+        if model_line := self.model_combo.lineEdit():
+            model_line.setPlaceholderText("Nome do modelo disponível no host")
         self.url_edit.setPlaceholderText("http://localhost:11434 ou http://localhost:1234/v1")
         self.log_text.setPlaceholderText("Logs e progresso serão exibidos aqui...")
 
@@ -818,11 +822,11 @@ class MCPGui(QMainWindow):
         model_default = OLLAMA_MODEL if host == "ollama" else LMSTUDIO_MODEL
         url_default = OLLAMA_URL if host == "ollama" else LMSTUDIO_URL
 
-        current_model = self.model_edit.text().strip()
+        current_model = self.model_combo.currentText().strip()
         current_url = self.url_edit.text().strip()
 
         if not current_model or current_model in {OLLAMA_MODEL, LMSTUDIO_MODEL}:
-            self.model_edit.setText(model_default)
+            self.model_combo.setEditText(model_default)
         if not current_url or current_url in {OLLAMA_URL, LMSTUDIO_URL}:
             self.url_edit.setText(url_default)
 
@@ -985,6 +989,8 @@ class MCPGui(QMainWindow):
             else:
                 self._append_log("Nenhum modelo retornado pelo servidor.")
 
+            self.models_signal.emit(names)
+
         self._run_async("Consultando modelos...", task)
 
     def _list_ollama_models(self, url: str) -> List[str]:
@@ -1008,6 +1014,21 @@ class MCPGui(QMainWindow):
             for m in data.get("data", [])
             if m.get("id")
         ]
+
+    @Slot(list)
+    def _populate_model_choices(self, names: List[str]) -> None:
+        current_text = self.model_combo.currentText().strip()
+
+        self.model_combo.blockSignals(True)
+        self.model_combo.clear()
+
+        unique_names = sorted(dict.fromkeys(names))
+        if unique_names:
+            self.model_combo.addItems(unique_names)
+
+        if current_text:
+            self.model_combo.setEditText(current_text)
+        self.model_combo.blockSignals(False)
 
     # -------------------------------------------------------------- Execução ----
 
@@ -1078,7 +1099,7 @@ class MCPGui(QMainWindow):
             only_raw=bool(self.only_raw_check.isChecked()),
             dry_run=bool(self.dry_run_check.isChecked()),
             limit=int(self.limit_spin.value()),
-            model=self.model_edit.text().strip() or model_default,
+            model=self.model_combo.currentText().strip() or model_default,
             llm_url=self.url_edit.text().strip() or url_default,
             target_dir=target_dir,
             prompt_file=prompt_file,
