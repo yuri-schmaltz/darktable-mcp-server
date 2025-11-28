@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """GUI para orquestrar os hosts MCP (Ollama ou LM Studio).
 
-A interface reúne em uma única janela todos os parâmetros necessários,
-permite checar conectividade, listar modelos disponíveis e executar
-os hosts mostrando o progresso das atividades.
+A interface reúne em uma única janela todos os parâmetros necessários
+para executar os hosts mostrando o progresso das atividades.
 """
 from __future__ import annotations
 
@@ -13,10 +12,7 @@ import subprocess
 import sys
 import threading
 from pathlib import Path
-from typing import Callable, List, Optional
-from urllib.parse import urlsplit
-
-import requests
+from typing import Callable, Optional
 
 from PySide6.QtCore import Qt, Signal, Slot
 from PySide6.QtGui import QIcon, QPixmap
@@ -51,17 +47,11 @@ from mcp_host_lmstudio import LMSTUDIO_MODEL, LMSTUDIO_URL
 from mcp_host_ollama import OLLAMA_MODEL, OLLAMA_URL, load_prompt as load_ollama_prompt
 
 
-def _base_url(full_url: str) -> str:
-    parsed = urlsplit(full_url)
-    return f"{parsed.scheme}://{parsed.netloc}"
-
-
 class MCPGui(QMainWindow):
     log_signal = Signal(str)
     status_signal = Signal(str)
     progress_signal = Signal(bool)
     error_signal = Signal(str)
-    models_signal = Signal(list)
 
     def __init__(self) -> None:
         super().__init__()
@@ -82,7 +72,6 @@ class MCPGui(QMainWindow):
         self.status_signal.connect(self._set_status_ui)
         self.progress_signal.connect(self._toggle_progress)
         self.error_signal.connect(self._show_error)
-        self.models_signal.connect(self._populate_model_choices)
 
         self._apply_global_style()
         self._build_layout()
@@ -446,50 +435,17 @@ class MCPGui(QMainWindow):
         self._style_form_field(self.url_edit)
         self._style_form_field(self.model_combo)
 
-        actions_widget = QWidget()
-        actions_layout = QHBoxLayout(actions_widget)
-        actions_layout.setContentsMargins(0, 0, 0, 0)
-        actions_layout.setSpacing(8)
-        actions_layout.setAlignment(Qt.AlignmentFlag.AlignVCenter)
-
-        # Usa a mesma altura do combo de modelo para alinhar visualmente
-        combo_h = self.model_combo.sizeHint().height()
-
-        list_button = QPushButton()
-        list_button.setIcon(
-            self.style().standardIcon(QStyle.StandardPixmap.SP_FileDialogListView)
-        )
-        list_button.setToolTip("Listar modelos")
-        list_button.setFixedSize(combo_h, combo_h)
-        list_button.clicked.connect(self.list_models)
-
-        check_button = QPushButton()
-        check_button.setIcon(
-            self.style().standardIcon(QStyle.StandardPixmap.SP_DialogApplyButton)
-        )
-        check_button.setToolTip("Verificar conectividade")
-        check_button.setFixedSize(combo_h, combo_h)
-        check_button.clicked.connect(self.check_connectivity)
-
-
-        actions_layout.addWidget(list_button)
-        actions_layout.addWidget(check_button)
-
         model_row_widget = QWidget()
         model_row_layout = QHBoxLayout(model_row_widget)
         model_row_layout.setContentsMargins(0, 0, 0, 0)
         model_row_layout.setSpacing(12)
-        
+
         # combo ocupa o espaço, mas alinhado verticalmente ao centro
         model_row_layout.addWidget(
             self.model_combo,
             1,
             Qt.AlignmentFlag.AlignVCenter,
-        )        
-        
-        
-        model_row_layout.addWidget(self.model_combo, stretch=1)
-        model_row_layout.addWidget(actions_widget)
+        )
         model_row_layout.setAlignment(Qt.AlignmentFlag.AlignVCenter)
 
         # LLM na mesma coluna do restante
@@ -907,110 +863,6 @@ class MCPGui(QMainWindow):
     @Slot(str)
     def _show_error(self, message: str) -> None:
         QMessageBox.critical(self, "Erro", message)
-
-    # ----------------------------- Conectividade --------------------------------------
-
-    def check_connectivity(self) -> None:
-        def task() -> None:
-            host = self._selected_host()
-            url = self.url_edit.text().strip() or (
-                OLLAMA_URL if host == "ollama" else LMSTUDIO_URL
-            )
-
-            if host == "ollama":
-                message = self._check_ollama(url)
-            else:
-                message = self._check_lmstudio(url)
-
-            self._append_log(message)
-            self.status_signal.emit(message)
-
-        self._run_async("Verificando conectividade...", task)
-
-    def _check_ollama(self, url: str) -> str:
-        base = _base_url(url)
-        resp = requests.get(f"{base}/api/tags", timeout=5)
-        resp.raise_for_status()
-        data = resp.json()
-        count = len(data.get("models", []))
-        return (
-            f"Ollama OK ({count} modelos disponíveis)"
-            if count
-            else "Ollama OK (nenhum modelo listado)"
-        )
-
-    def _check_lmstudio(self, url: str) -> str:
-        base = _base_url(url)
-        resp = requests.get(f"{base}/v1/models", timeout=5)
-        resp.raise_for_status()
-        data = resp.json()
-        models = data.get("data", [])
-        count = len(models)
-        return (
-            f"LM Studio OK ({count} modelos disponíveis)"
-            if count
-            else "LM Studio OK (nenhum modelo listado)"
-        )
-
-    # ----------------------------- Modelos -----------------------------------------
-
-    def list_models(self) -> None:
-        def task() -> None:
-            host = self._selected_host()
-            url = self.url_edit.text().strip() or (
-                OLLAMA_URL if host == "ollama" else LMSTUDIO_URL
-            )
-
-            if host == "ollama":
-                names = self._list_ollama_models(url)
-            else:
-                names = self._list_lmstudio_models(url)
-
-            if names:
-                self._append_log("Modelos disponíveis:\n- " + "\n- ".join(names))
-            else:
-                self._append_log("Nenhum modelo retornado pelo servidor.")
-
-            self.models_signal.emit(names)
-
-        self._run_async("Consultando modelos...", task)
-
-    def _list_ollama_models(self, url: str) -> List[str]:
-        base = _base_url(url)
-        resp = requests.get(f"{base}/api/tags", timeout=5)
-        resp.raise_for_status()
-        data = resp.json()
-        return [
-            m.get("name", "")
-            for m in data.get("models", [])
-            if m.get("name")
-        ]
-
-    def _list_lmstudio_models(self, url: str) -> List[str]:
-        base = _base_url(url)
-        resp = requests.get(f"{base}/v1/models", timeout=5)
-        resp.raise_for_status()
-        data = resp.json()
-        return [
-            m.get("id", "")
-            for m in data.get("data", [])
-            if m.get("id")
-        ]
-
-    @Slot(list)
-    def _populate_model_choices(self, names: List[str]) -> None:
-        current_text = self.model_combo.currentText().strip()
-
-        self.model_combo.blockSignals(True)
-        self.model_combo.clear()
-
-        unique_names = sorted(dict.fromkeys(names))
-        if unique_names:
-            self.model_combo.addItems(unique_names)
-
-        if current_text:
-            self.model_combo.setEditText(current_text)
-        self.model_combo.blockSignals(False)
 
     # ----------------------------- Execução -------------------------------------------------
 
