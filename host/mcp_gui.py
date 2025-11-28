@@ -276,7 +276,7 @@ class MCPGui(QMainWindow):
         config_form.setHorizontalSpacing(16)
         config_form.setVerticalSpacing(12)
         config_form.setLabelAlignment(
-            Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
+            Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
         )
         config_form.setFormAlignment(
             Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop
@@ -474,12 +474,19 @@ class MCPGui(QMainWindow):
 
         llm_form = QFormLayout()
         llm_form.setContentsMargins(0, 0, 0, 0)
-        llm_form.setHorizontalSpacing(14)
-        llm_form.setVerticalSpacing(10)
-        llm_form.setLabelAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        llm_form.setHorizontalSpacing(16)
+        llm_form.setVerticalSpacing(12)
+        llm_form.setFormAlignment(
+            Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop
+        )
+        llm_form.setLabelAlignment(
+            Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
+        )
         llm_form.addRow("Framework:", host_widget)
         llm_form.addRow("URL:", self.url_edit)
         llm_form.addRow("Modelo:", model_row_widget)
+
+        self._sync_form_label_widths(config_form, llm_form)
 
         llm_layout.addLayout(llm_form)
 
@@ -583,6 +590,24 @@ class MCPGui(QMainWindow):
         widget.setMinimumWidth(260)
         widget.setMinimumHeight(32)
         widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+
+    def _sync_form_label_widths(self, *forms: QFormLayout) -> None:
+        """Mantém colunas de rótulos alinhadas entre múltiplos formulários."""
+
+        max_width = 0
+        labels = []
+
+        for form in forms:
+            for row in range(form.rowCount()):
+                label_item = form.itemAt(row, QFormLayout.ItemRole.LabelRole)
+                label_widget = label_item.widget() if label_item else None
+                if label_widget:
+                    labels.append(label_widget)
+                    max_width = max(max_width, label_widget.sizeHint().width())
+
+        for label in labels:
+            label.setMinimumWidth(max_width)
+            label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
 
     # ----------------------------- Padrões -------------------------------------
 
