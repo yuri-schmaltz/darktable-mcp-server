@@ -262,8 +262,7 @@ class MCPGui(QMainWindow):
         form_column = QVBoxLayout()
         form_column.setSpacing(14)
 
-    # -------------------------- Grupo: Configuração -------------------------
-        
+        # -------------------------- Grupo: Configuração -------------------------
         config_group = QGroupBox("Configurações")
         config_group.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
@@ -282,6 +281,8 @@ class MCPGui(QMainWindow):
             Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop
         )
 
+        # -------------------------- Campos principais ---------------------------
+
         self.mode_combo = QComboBox()
         self.mode_combo.addItems(["export", "rating", "tagging", "tratamento"])
         self.mode_combo.setToolTip(
@@ -289,7 +290,7 @@ class MCPGui(QMainWindow):
         )
 
         self.source_combo = QComboBox()
-        self.source_combo.addItems(["all", "collection", "path", "tag", ])
+        self.source_combo.addItems(["all", "collection", "path", "tag"])
         self.source_combo.setToolTip(
             "Escolhe de onde as imagens serão obtidas: todas, por caminho, por tag ou coleção"
         )
@@ -313,7 +314,7 @@ class MCPGui(QMainWindow):
         config_form.addRow("Rating mínimo:", self.min_rating_spin)
         config_form.addRow("Limite:", self.limit_spin)
 
-    # -------------------------- Seção: Filtros e opções ---------------------
+        # -------------------------- Filtros e opções ---------------------------
 
         self.path_contains_edit = QLineEdit()
         self.tag_edit = QLineEdit()
@@ -357,7 +358,6 @@ class MCPGui(QMainWindow):
         prompt_row_layout.addWidget(self.prompt_generate_button)
 
         prompt_row_layout.addStretch()
-
         config_form.addRow("Prompt personalizado:", prompt_row_widget)
 
         # Dir export + botão
@@ -381,7 +381,6 @@ class MCPGui(QMainWindow):
         # Checkboxes (Apenas RAW / Dry-run)
         flags_widget = QWidget()
         flags_layout = QHBoxLayout(flags_widget)
-        # mesmas margens dos outros rows (prompt/dir export)
         flags_layout.setContentsMargins(0, 0, 0, 0)
         flags_layout.setSpacing(16)
 
@@ -401,15 +400,7 @@ class MCPGui(QMainWindow):
 
         config_form.addRow("Execução:", flags_widget)
 
-        config_layout.addLayout(config_form)
-
-    # ------------------------------- Seção LLM ------------------------------
-        
-        llm_group = QWidget()
-
-        llm_layout = QVBoxLayout(llm_group)
-        llm_layout.setContentsMargins(0, 0, 0, 0)
-        llm_layout.setSpacing(12)
+        # ------------------------------- Seção LLM ------------------------------
 
         self.host_group = QButtonGroup(self)
         self.host_ollama = QRadioButton("Ollama")
@@ -472,30 +463,19 @@ class MCPGui(QMainWindow):
         model_row_layout.addWidget(actions_widget)
         model_row_layout.setAlignment(actions_widget, Qt.AlignmentFlag.AlignVCenter)
 
-        llm_form = QFormLayout()
-        llm_form.setContentsMargins(0, 0, 0, 0)
-        llm_form.setHorizontalSpacing(14)
-        llm_form.setVerticalSpacing(10)
-        llm_form.setFormAlignment(
-            Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop
-        )
-        llm_form.setLabelAlignment(
-            Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
-        )
-        llm_form.addRow("Framework:", host_widget)
-        llm_form.addRow("URL:", self.url_edit)
-        llm_form.addRow("Modelo:", model_row_widget)
+        # LLM na mesma coluna do restante
+        config_form.addRow("Framework:", host_widget)
+        config_form.addRow("URL:", self.url_edit)
+        config_form.addRow("Modelo:", model_row_widget)
 
-        self._sync_form_label_widths(config_form, llm_form)
+        # Ajusta largura de todos os rótulos desse formulário
+        self._sync_form_label_widths(config_form)
 
-        llm_layout.addLayout(llm_form)
-
-        config_layout.addWidget(llm_group)
-
+        # Adiciona o form completo ao grupo
+        config_layout.addLayout(config_form)
         form_column.addWidget(config_group, stretch=1)
 
-    # ------------------------------------ Log -------------------------------
-        
+        # ------------------------------------ Log -------------------------------
         log_group = QGroupBox("Log")
         log_group.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
@@ -522,27 +502,20 @@ class MCPGui(QMainWindow):
         right_column.setSpacing(14)
         right_column.addWidget(log_group, stretch=1)
 
-    # ----------------------------- Botão principal --------------------------
-        
+        # ----------------------------- Botão principal --------------------------
         self.run_button = QPushButton("Executar host")
-        # marcar como botão principal para o stylesheet
         self.run_button.setObjectName("primaryButton")
-        # ícone de "play"
         self.run_button.setIcon(
             self.style().standardIcon(QStyle.StandardPixmap.SP_MediaPlay)
         )
-
-        # botão ocupa toda a largura disponível na coluna da direita
         self.run_button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.run_button.setMinimumWidth(0)
-
         self.run_button.setToolTip("Inicia o host com os parâmetros configurados")
         self.run_button.clicked.connect(self.run_host)
 
         run_row = QHBoxLayout()
         run_row.setContentsMargins(0, 6, 0, 0)
         run_row.setSpacing(12)
-        # sem addStretch(): o botão pega toda a linha
         run_row.addWidget(self.run_button)
 
         right_column.addLayout(run_row)
