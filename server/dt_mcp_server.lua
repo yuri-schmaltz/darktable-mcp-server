@@ -126,6 +126,74 @@ end
 
 local dt_paths = detect_darktable_paths()
 
+local function ensure_ld_library_path()
+  if not dt_paths.is_flatpak then
+    return
+  end
+
+  if os.getenv("DT_MCP_LD_REEXEC") == "1" then
+    io.stderr:write("[init] LD_LIBRARY_PATH already injected\n")
+    return
+  end
+
+  local ld_library_path = os.getenv("LD_LIBRARY_PATH") or ""
+  local extra_paths = {}
+
+  for _, dir in ipairs({ dt_paths.prefix .. "/lib", dt_paths.prefix .. "/lib64" }) do
+    if dir_exists(dir) and not ld_library_path:find(dir, 1, true) then
+      table.insert(extra_paths, dir)
+    end
+  end
+
+  if #extra_paths == 0 then
+    return
+  end
+
+  local new_ld_path = table.concat(extra_paths, ":")
+  if ld_library_path ~= "" then
+    new_ld_path = new_ld_path .. ":" .. ld_library_path
+  end
+
+  local script = debug.getinfo(1, "S").source or arg[0]
+  if script:sub(1, 1) == "@" then
+    script = script:sub(2)
+  end
+
+  local interpreter = arg and arg[-1] or "lua"
+  local extra_args = {}
+  if arg then
+    for i = 1, #arg do
+      table.insert(extra_args, string.format("%q", arg[i]))
+    end
+  end
+
+  local cmd = string.format(
+    "LD_LIBRARY_PATH=%q DT_MCP_LD_REEXEC=1 %s %q %s",
+    new_ld_path,
+    interpreter or "lua",
+    script,
+    table.concat(extra_args, " ")
+  )
+
+  io.stderr:write(string.format(
+    "[init] re-exec with LD_LIBRARY_PATH=%s (flatpak)\n",
+    new_ld_path
+  ))
+
+  local exec_status = os.execute(cmd)
+  local exit_code = 1
+
+  if type(exec_status) == "number" then
+    exit_code = exec_status
+  elseif exec_status == true then
+    exit_code = 0
+  end
+
+  os.exit(exit_code)
+end
+
+ensure_ld_library_path()
+
 for _, p in ipairs(dt_paths.cpaths) do
   package.cpath = package.cpath .. ";" .. p
 end
