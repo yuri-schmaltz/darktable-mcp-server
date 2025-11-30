@@ -60,7 +60,15 @@ class McpClient:
         assert self.proc.stdout is not None
         resp_line = self.proc.stdout.readline()
         if not resp_line:
-            raise RuntimeError("Servidor MCP não respondeu (stdout vazio)")
+            stderr_output = ""
+            if self.proc.stderr:
+                try:
+                    stderr_output = self.proc.stderr.read() or ""
+                except Exception:
+                    stderr_output = ""
+
+            extra = f" | stderr: {stderr_output.strip()}" if stderr_output else ""
+            raise RuntimeError(f"Servidor MCP não respondeu (stdout vazio){extra}")
         resp = json.loads(resp_line)
         if "error" in resp:
             raise RuntimeError(resp["error"])
