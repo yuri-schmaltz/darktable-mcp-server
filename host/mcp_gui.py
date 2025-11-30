@@ -302,9 +302,10 @@ class MCPGui(QMainWindow):
         # -------------------------- Campos principais ---------------------------
 
         self.mode_combo = QComboBox()
-        self.mode_combo.addItems(["export", "rating", "tagging", "tratamento"])
+        self.mode_combo.addItems(["export", "rating", "tagging", "tratamento", "completo"])
         self.mode_combo.setToolTip(
-            "Define o tipo de operação: atribuir notas, sugerir tags, exportar ou tratamento"
+            "Define o tipo de operação: atribuir notas, sugerir tags, exportar, tratamento"
+            " ou o fluxo completo (rating→tagging→tratamento→export)."
         )
 
         self.source_combo = QComboBox()
@@ -780,7 +781,9 @@ class MCPGui(QMainWindow):
         self.path_contains_edit.setPlaceholderText("/cliente-x/viagem")
         self.tag_edit.setPlaceholderText("job:cliente")
         self.prompt_edit.setPlaceholderText("Arquivo .md opcional com prompt customizado")
-        self.target_edit.setPlaceholderText("Diretório de export (apenas modo export)")
+        self.target_edit.setPlaceholderText(
+            "Diretório de export (necessário em export ou completo)"
+        )
         if model_line := self.model_combo.lineEdit():
             model_line.setPlaceholderText("Nome do modelo disponível no host")
         self.url_edit.setPlaceholderText("http://localhost:11434 ou http://localhost:1234/v1")
@@ -839,15 +842,15 @@ class MCPGui(QMainWindow):
         )
 
     def _update_mode_fields(self, mode: str) -> None:
-        is_export = mode == "export"
+        is_export = mode in {"export", "completo"}
 
         self.target_edit.setEnabled(is_export)
         self.target_button.setEnabled(is_export)
 
         tooltip = (
-            "Necessário apenas para export"
+            "Necessário para export ou modo completo"
             if is_export
-            else "Habilite ao selecionar modo export"
+            else "Habilite ao selecionar modo export ou completo"
         )
         self.target_edit.setToolTip(tooltip)
         self.target_button.setToolTip(tooltip)
@@ -968,8 +971,8 @@ class MCPGui(QMainWindow):
             raise ValueError("Tag é obrigatória quando a fonte é 'tag'.")
         if source == "collection" and not collection:
             raise ValueError("Coleção é obrigatória quando a fonte é 'collection'.")
-        if mode == "export" and not target_dir:
-            raise ValueError("Diretório de export é obrigatório em modo export.")
+        if mode in {"export", "completo"} and not target_dir:
+            raise ValueError("Diretório de export é obrigatório em modo export ou completo.")
 
         model_default = OLLAMA_MODEL if host == "ollama" else LMSTUDIO_MODEL
         url_default = OLLAMA_URL if host == "ollama" else LMSTUDIO_URL
