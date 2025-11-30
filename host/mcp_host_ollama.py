@@ -463,6 +463,20 @@ def run_mode_tratamento(client, args):
     )
     print(f"[tratamento] Log salvo em: {log_file}")
 
+    try:
+        parsed = json.loads(answer)
+    except Exception as exc:
+        print("[tratamento] Erro ao parsear JSON:", exc)
+        return
+
+    plano = parsed.get("plano") or parsed.get("plan")
+    if not plano:
+        print("[tratamento] Nenhum plano retornado pelo modelo.")
+        return
+
+    print("[tratamento] Plano sugerido:")
+    print(plano)
+
     if args.dry_run:
         print("[tratamento] DRY-RUN: mantendo somente a sugestão do modelo.")
 
