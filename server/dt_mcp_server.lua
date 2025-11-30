@@ -160,11 +160,33 @@ local function ensure_ld_library_path()
   end
 
   local interpreter = arg and arg[-1] or "lua"
-  local extra_args = {}
+  local quoted_args, raw_args = {}, {}
   if arg then
     for i = 1, #arg do
-      table.insert(extra_args, string.format("%q", arg[i]))
+      table.insert(quoted_args, string.format("%q", arg[i]))
+      table.insert(raw_args, arg[i])
     end
+  end
+
+  io.stderr:write(string.format(
+    "[init] re-exec with LD_LIBRARY_PATH=%s (flatpak)\n",
+    new_ld_path
+  ))
+
+  local has_posix_unistd, posix_unistd = pcall(require, "posix.unistd")
+  local has_posix_stdlib, posix_stdlib = pcall(require, "posix.stdlib")
+
+  if has_posix_unistd and has_posix_stdlib and posix_unistd and posix_stdlib then
+    posix_stdlib.setenv("LD_LIBRARY_PATH", new_ld_path, true)
+    posix_stdlib.setenv("DT_MCP_LD_REEXEC", "1", true)
+
+    local exec_args = { interpreter or "lua", script }
+    for _, a in ipairs(raw_args) do
+      table.insert(exec_args, a)
+    end
+
+    posix_unistd.execp(exec_args[1], exec_args)
+    io.stderr:write("[init] posix exec failed, falling back to shell\n")
   end
 
   local cmd = string.format(
@@ -172,13 +194,8 @@ local function ensure_ld_library_path()
     new_ld_path,
     interpreter or "lua",
     script,
-    table.concat(extra_args, " ")
+    table.concat(quoted_args, " ")
   )
-
-  io.stderr:write(string.format(
-    "[init] re-exec with LD_LIBRARY_PATH=%s (flatpak)\n",
-    new_ld_path
-  ))
 
   local exec_status = os.execute(cmd)
   local exit_code = 1
