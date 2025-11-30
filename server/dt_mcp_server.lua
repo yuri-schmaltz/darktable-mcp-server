@@ -88,7 +88,12 @@ local function detect_darktable_paths()
       lib_path  = "/usr/lib/darktable/libdarktable.so",
       datadir   = "/usr/share/darktable",
       moduledir = "/usr/lib/darktable",
-      cpaths    = { "/usr/lib/darktable/lib?.so" }
+      cpaths    = {
+        "/usr/lib/lib?.so",
+        "/usr/lib64/lib?.so",
+        "/usr/lib/darktable/lib?.so",
+        "/usr/lib64/darktable/lib?.so",
+      }
     }
   end
 
@@ -98,8 +103,12 @@ local function detect_darktable_paths()
   end
 
   local cpaths = {
+    chosen.prefix .. "/lib/lib?.so",
+    chosen.prefix .. "/lib64/lib?.so",
     chosen.prefix .. "/lib/?.so",
     chosen.prefix .. "/lib64/?.so",
+    chosen.prefix .. "/lib/darktable/lib?.so",
+    chosen.prefix .. "/lib64/darktable/lib?.so",
     chosen.prefix .. "/lib/darktable/?.so",
     chosen.prefix .. "/lib64/darktable/?.so",
   }
