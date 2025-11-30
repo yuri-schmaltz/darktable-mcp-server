@@ -461,6 +461,15 @@ def main():
     if args.check_deps:
         run_dependency_check()
 
+    if not args.download_model:
+        missing = check_dependencies([*DEPENDENCY_BINARIES], exit_on_success=False)
+        if missing:
+            print(
+                "[deps] Dependências ausentes; instale-as e execute novamente ou use "
+                "--check-deps para revalidar."
+            )
+            raise SystemExit(1)
+
     # Apenas garante que diretórios existem
     LOG_DIR.mkdir(exist_ok=True)
 
