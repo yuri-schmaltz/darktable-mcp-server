@@ -94,6 +94,105 @@ def pull_ollama_model(model: str, url: str | None = None):
     if not statuses:
         statuses.append("Download iniciado; acompanhe logs do Ollama para progresso.")
     return statuses
+
+
+# --------- UTIL: checagem de modelo ---------
+def _fetch_ollama_model_metadata(model: str, url: str | None = None) -> dict | None:
+    base = _normalize_base_url(url)
+    show_url = f"{base}/api/show"
+    try:
+        resp = requests.post(show_url, json={"model": model}, timeout=5)
+        resp.raise_for_status()
+    except Exception:
+        return None
+
+    try:
+        return resp.json()
+    except Exception:
+        return None
+
+
+def _classify_ollama_multimodal(metadata: dict, fallback_name: str) -> tuple[str, str]:
+    details = metadata.get("details") or {}
+    model_info = metadata.get("model_info") or metadata.get("info") or {}
+    modelfile = metadata.get("modelfile") or ""
+
+    if isinstance(model_info, dict):
+        if model_info.get("vision") is True:
+            return "supported", "model_info.vision=true"
+        if model_info.get("vision") is False:
+            return "unsupported", "model_info.vision=false"
+
+    families: list[str] = []
+    raw_families = details.get("families") or []
+    if isinstance(raw_families, list):
+        families.extend([f for f in raw_families if isinstance(f, str)])
+    family = details.get("family")
+    if isinstance(family, str):
+        families.append(family)
+
+    if any(fam.lower() in {"vision", "vl", "llava", "clip"} for fam in families):
+        return "supported", "families indica visão"
+
+    if modelfile and any(token in modelfile.lower() for token in ["vision", "image", "clip", "multimodal"]):
+        return "supported", "modelfile menciona visão"
+
+    name = str(
+        metadata.get("name")
+        or metadata.get("model")
+        or metadata.get("id")
+        or fallback_name
+    ).lower()
+    if any(token in name for token in ["vision", "vl", "llava"]):
+        return "supported", "heurística no nome do modelo"
+
+    return "unknown", "metadados não indicam visão"
+
+
+def ensure_ollama_model_supports_images(
+    model: str | None, url: str | None, text_only: bool
+) -> tuple[bool, str]:
+    if text_only:
+        return False, "modo texto solicitado"
+
+    effective_model = model or OLLAMA_MODEL
+    if not effective_model:
+        msg = (
+            "[vision-check] Modelo não especificado; não é possível validar suporte a imagens. "
+            "Use --text-only se encontrar erros."
+        )
+        print(msg)
+        return False, msg
+
+    metadata = _fetch_ollama_model_metadata(effective_model, url)
+    if not metadata:
+        msg = (
+            f"[vision-check] Não foi possível obter metadados para '{effective_model}'. "
+            "Prosseguindo mesmo assim; use --text-only se o provider recusar imagens."
+        )
+        print(msg)
+        return False, msg
+
+    status, detail = _classify_ollama_multimodal(metadata, effective_model)
+    if status == "unsupported":
+        raise SystemExit(
+            f"[vision-check] O modelo '{effective_model}' não parece suportar imagens ({detail}). "
+            "Escolha um modelo multimodal ou execute com --text-only."
+        )
+
+    if status == "supported":
+        message = (
+            f"[vision-check] Modelo '{effective_model}' validado como multimodal ({detail})."
+        )
+        print(message)
+        return True, message
+
+    message = (
+        f"[vision-check] Suporte a imagens não pôde ser confirmado para '{effective_model}' "
+        f"({detail}). Continue apenas se tiver certeza de que o modelo é multimodal."
+    )
+    print(message)
+    return False, message
 # --------- CLI ---------
 def parse_args():
     p = argparse.ArgumentParser(
@@ -541,6 +640,18 @@ def main():
                 "--check-deps para revalidar."
             )
             raise SystemExit(1)
+
+    vision_supported, _ = (False, "")
+    if not args.check_darktable and not args.list_collections and not args.download_model:
+        vision_supported, _ = ensure_ollama_model_supports_images(
+            args.model, args.ollama_url, args.text_only
+        )
+        if not args.text_only and not vision_supported:
+            print(
+                "[vision-check] Imagens desabilitadas porque o suporte multimodal não foi "
+                "confirmado. Use --text-only para permanecer em modo texto."
+            )
+            args.text_only = True
 
     # Apenas garante que diretórios existem
     LOG_DIR.mkdir(exist_ok=True)
