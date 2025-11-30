@@ -152,6 +152,8 @@ abaixo corresponde a um parâmetro aceito pelos hosts de linha de comando:
    - Abra `server/dt_mcp_server.lua` e ajuste os caminhos para `libdarktable.so`, `--datadir` e `--moduledir` conforme sua distribuição.
    - Se estiver testando fora do ambiente padrão, confirme que `darktable-cli` está no `PATH`.
 
+> Consulte a seção [Fluxo host ↔ dt_mcp_server ↔ LLM](#fluxo-host--dt_mcp_server--llm) para um passo a passo do ciclo completo (incluindo dry-run seguro e exemplos de JSON).
+
 2. **Instale dependências**
    - Lua + luarocks e o módulo `dkjson` (`sudo luarocks install dkjson`).
    - Python 3 com `requests` (use um venv se preferir: `python -m venv .venv && source .venv/bin/activate && pip install requests`).
@@ -209,6 +211,82 @@ abaixo corresponde a um parâmetro aceito pelos hosts de linha de comando:
 11. **Dicas de depuração**
     - Se o MCP não responder, rode o teste rápido do servidor Lua (seção "Teste rápido do servidor MCP") e confira permissões dos diretórios do darktable.
     - Ative `--dry-run` sempre que alterar prompts ou filtros para evitar aplicar mudanças incorretas na base.
+
+## Fluxo host ↔ dt_mcp_server ↔ LLM
+
+O ciclo completo começa com o host subindo `dt_mcp_server.lua`, descobrindo ferramentas disponíveis e, em seguida, combinando metadados + imagens com o LLM. Sempre que estiver experimentando prompts novos, mantenha `--dry-run` para garantir que nenhum rating/tag/export seja aplicado no catálogo.
+
+### Diagrama simplificado
+
+```
+Host (Python) --initialize--> dt_mcp_server.lua --tools/list--> catálogo do darktable
+Host <--lista de ferramentas-- dt_mcp_server.lua
+Host --list_collection/list_by_*--> dt_mcp_server.lua --> darktable (metadados/imagens)
+Host (envia imagens+metadados) --> LLM (gera plano + tool_calls) --> Host --tools/call--> dt_mcp_server.lua
+```
+
+### Exemplos de requisições/respostas JSON
+
+- **Handshake inicial**
+  - Requisição: `{"jsonrpc":"2.0","id":"1","method":"initialize","params":{}}`
+  - Resposta esperada (resumida):
+    ```json
+    {
+      "jsonrpc": "2.0",
+      "id": "1",
+      "result": {
+        "protocolVersion": "2024-11-05",
+        "serverInfo": {"name": "darktable-mcp-batch", "version": "0.2.0"},
+        "capabilities": {"tools": {"listChanged": false}}
+      }
+    }
+    ```
+
+- **Listar coleção**
+  - Requisição: `{"jsonrpc":"2.0","id":"2","method":"tools/call","params":{"name":"list_collection","arguments":{"min_rating":0,"only_raw":false,"collection_path":"cliente-x"}}}`
+  - Resposta (trecho):
+    ```json
+    {
+      "jsonrpc": "2.0",
+      "id": "2",
+      "result": {
+        "content": [
+          {"type": "json", "json": [{"id": 123, "path": "/home/user/fotos/cliente-x", "rating": 2, "is_raw": true}]}
+        ],
+        "isError": false
+      }
+    }
+    ```
+
+- **Resposta esperada do LLM para aplicar ações** (exemplo OpenAI-compatible com tool call de rating):
+  ```json
+  {
+    "role": "assistant",
+    "tool_calls": [
+      {
+        "id": "call-1",
+        "type": "function",
+        "function": {
+          "name": "apply_batch_edits",
+          "arguments": "{\"edits\":[{\"id\":123,\"rating\":3},{\"id\":124,\"rating\":5}]}"
+        }
+      }
+    ],
+    "content": "Ajustando ratings conforme nitidez/duplicatas."
+  }
+  ```
+
+### Dry-run seguro
+
+- **CLI Ollama**: `python host/mcp_host_ollama.py --mode rating --source all --dry-run`
+- **CLI LM Studio**: `python host/mcp_host_lmstudio.py --mode rating --source all --dry-run`
+- Resultado esperado: o host imprime o plano (tool calls, filtros e amostra de imagens) e encerra sem chamar `apply_batch_edits`, `tag_batch` ou `export_collection`.
+
+### Troubleshooting do fluxo
+
+- **Timeout ao aguardar o LLM**: aumente `--timeout` no host, valide conectividade com `curl <LLM_URL>/v1/models` e reduza `--limit` para mandar amostras menores.
+- **`darktable-cli` ausente**: confirme com `which darktable-cli` ou use `DARKTABLE_CLI_CMD="flatpak run --command=darktable-cli org.darktable.Darktable"`. Sem o binário, `export_collection` falhará.
+- **Permissões do diretório de export**: garanta que o usuário possa criar/gravar no `--target-dir`; em ambientes restritos, teste primeiro com `--dry-run` e depois rode `mkdir -p <dir>` antes do export.
 
 ## Uso com LM Studio
 
