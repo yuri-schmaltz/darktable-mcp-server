@@ -384,7 +384,7 @@ class MCPGui(QMainWindow):
         prompt_row_layout.setSpacing(12)
         prompt_row_layout.addWidget(self.prompt_edit, stretch=1)
 
-        self.prompt_button = QPushButton("Selecionar")
+        self.prompt_button = QPushButton("Sel")
         self._standardize_button(self.prompt_button, width=78)
         self.prompt_button.clicked.connect(self._choose_prompt_file)
         prompt_row_layout.addWidget(self.prompt_button)
@@ -404,7 +404,7 @@ class MCPGui(QMainWindow):
         target_row_layout.setSpacing(12)
         target_row_layout.addWidget(self.target_edit, stretch=1)
 
-        self.target_button = QPushButton("Selecionar")
+        self.target_button = QPushButton("Sel")
         self._standardize_button(self.target_button, width=78)
         self.target_button.clicked.connect(self._choose_target_dir)
         self.target_button.setToolTip(
@@ -463,7 +463,7 @@ class MCPGui(QMainWindow):
         self.url_edit = QLineEdit()
         self.url_edit.setToolTip("URL base do servidor LLM escolhido")
         self.model_combo.setToolTip("Nome do modelo carregado no servidor selecionado")
-        self.check_models_button = QPushButton("Testar URL")
+        self.check_models_button = QPushButton("Conectar")
         self.check_models_button.setIcon(
             self.style().standardIcon(QStyle.StandardPixmap.SP_BrowserReload)
         )
