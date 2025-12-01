@@ -292,6 +292,9 @@ class MCPGui(QMainWindow):
         config_form.setContentsMargins(0, 0, 0, 0)
         config_form.setHorizontalSpacing(16)
         config_form.setVerticalSpacing(12)
+        config_form.setFieldGrowthPolicy(
+            QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow
+        )
         config_form.setLabelAlignment(
             Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
         )
