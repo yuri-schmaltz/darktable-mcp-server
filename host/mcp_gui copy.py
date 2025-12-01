@@ -362,7 +362,9 @@ class MCPGui(QMainWindow):
         config_form.addRow("Tag:", self.tag_edit)
 
         self.darktable_probe_button = QPushButton()
-        self.darktable_probe_button.setIcon(self._build_check_icon())
+        self.darktable_probe_button.setIcon(
+            self.style().standardIcon(QStyle.StandardPixmap.SP_DialogApplyButton)
+        )
         self.darktable_probe_button.setToolTip(
             "Testa a conexão com o darktable, lista coleções e mostra uma amostra das fotos encontradas"
         )
@@ -373,11 +375,7 @@ class MCPGui(QMainWindow):
         collection_row_layout = QHBoxLayout(collection_row_widget)
         collection_row_layout.setContentsMargins(0, 0, 0, 0)
         collection_row_layout.setSpacing(10)
-        collection_row_widget.setSizePolicy(
-            QSizePolicy.Expanding, QSizePolicy.Preferred
-        )
         collection_row_layout.addWidget(self.collection_edit, stretch=1)
-        collection_row_layout.addStretch()
         collection_row_layout.addWidget(self.darktable_probe_button)
 
         config_form.addRow("Coleção:", collection_row_widget)
@@ -697,7 +695,7 @@ class MCPGui(QMainWindow):
         font.setPointSize(12)
         painter.setFont(font)
 
-        painter.drawText(pixmap.rect(), Qt.AlignmentFlag.AlignCenter, "V")
+        painter.drawText(pixmap.rect(), Qt.AlignmentFlag.AlignCenter, "✓")
         painter.end()
 
         return QIcon(pixmap)
