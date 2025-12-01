@@ -389,7 +389,7 @@ class MCPGui(QMainWindow):
         self.prompt_button.clicked.connect(self._choose_prompt_file)
         prompt_row_layout.addWidget(self.prompt_button)
 
-        self.prompt_generate_button = QPushButton("Gerar modelo")
+        self.prompt_generate_button = QPushButton("Gerar")
         self._standardize_button(self.prompt_generate_button, width=78)
         self.prompt_generate_button.clicked.connect(self._generate_prompt_template)
         prompt_row_layout.addWidget(self.prompt_generate_button)
