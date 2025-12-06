@@ -91,6 +91,7 @@ class McpClient:
         
         self.proc = None
         self.request_id = 0
+        self.msg_id = 0
         self.log_file = log_file
         self.response_timeout = response_timeout
         self._next_req_id = 1
