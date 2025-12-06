@@ -194,7 +194,8 @@ local function ensure_ld_library_path()
   end
 
   if #extra_paths == 0 then
-    return
+    -- Mesmo sem libs extras, se temos um lua estático, podemos querer usá-lo 
+    -- mas a lógica original só dava return. Vamos continuar se tivermos o binário static.
   end
 
   local new_ld_path = table.concat(extra_paths, ":")
@@ -207,7 +208,22 @@ local function ensure_ld_library_path()
     script = script:sub(2)
   end
 
+  -- Tenta localizar o lua-static no diretório host/ (pai de server/) ou no mesmo dir
+  -- script está em server/dt_mcp_server.lua (normalmente)
+  -- buscamos ../host/lua-static
+  local script_dir = script:match("(.*/)") or "./"
+  local static_lua_path = script_dir .. "../host/lua-static"
+  
+  -- Resolve path absoluto ou normaliza se possível, mas aqui vamos tentar executar direto 
+  -- se o arquivo existir.
   local interpreter = arg and arg[-1] or "lua"
+  
+  if file_exists(static_lua_path) then
+    -- Se achamos o estático, usamos ele. Precisamos garantir permissão x, mas já fizemos chmod.
+    interpreter = static_lua_path
+    io.stderr:write(string.format("[init] using static lua: %s\n", interpreter))
+  end
+
   local extra_args = {}
   if arg then
     for i = 1, #arg do
