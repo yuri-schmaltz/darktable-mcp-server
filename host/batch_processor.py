@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 from typing import Optional
+import logging
 
 from common import (
     fetch_images,
@@ -87,7 +88,7 @@ class BatchProcessor:
 
     def _process_common(self, mode: str, args):
         images = fetch_images(self.client, args)
-        print(f"[{mode}] Imagens filtradas: {len(images)}")
+        logging.info(f"[{mode}] Imagens filtradas: {len(images)}")
         if not images:
             return None, None
 
@@ -96,16 +97,18 @@ class BatchProcessor:
         vision_images, vision_errors = prepare_vision_payloads(sample, attach_images=not args.text_only)
         
         if vision_errors:
-            print(f"[{mode}] Erros de imagem:", vision_errors)
+            logging.warning(f"[{mode}] Erros de imagem: {vision_errors}")
 
         messages = build_messages(system_prompt, sample, vision_images, self.provider_type)
         
-        print(f"[{mode}] Enviando requisição ao LLM ({self.provider.model})...")
+        logging.info(f"[{mode}] Enviando requisição ao LLM ({self.provider.model})...")
+        logging.debug(f"[{mode}] Prompt System: {system_prompt[:100]}...")
+        
         answer, meta = self.provider.chat(messages)
-        print(f"[{mode}] Resposta recebida ({meta.get('latency_ms', 0)}ms)")
+        logging.info(f"[{mode}] Resposta recebida ({meta.get('latency_ms', 0)}ms)")
 
         log_file = save_log(mode, args.source, sample, answer, extra={"llm": meta})
-        print(f"[{mode}] Log: {log_file}")
+        logging.info(f"[{mode}] Log: {log_file}")
         
         return answer, log_file
 

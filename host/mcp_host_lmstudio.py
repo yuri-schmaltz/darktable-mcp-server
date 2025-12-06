@@ -14,7 +14,8 @@ from common import (
     check_dependencies,
     probe_darktable_state,
     list_available_collections,
-    load_prompt
+    load_prompt,
+    setup_logging
 )
 from llm_api import OpenAICompatProvider
 from batch_processor import BatchProcessor
@@ -59,10 +60,14 @@ def parse_args():
     p.add_argument("--check-darktable", action="store_true")
     p.add_argument("--list-collections", action="store_true")
     
+    # Logging
+    p.add_argument("--verbose", action="store_true", help="Ativa logs detalhados no console")
+    
     return p.parse_args()
 
 def main():
     args = parse_args()
+    setup_logging(verbose=args.verbose)
     
     if args.check_deps:
         check_dependencies(DEPENDENCY_BINARIES)

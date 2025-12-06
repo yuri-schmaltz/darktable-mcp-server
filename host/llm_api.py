@@ -6,6 +6,7 @@ import requests
 from abc import ABC, abstractmethod
 from typing import Iterator, Optional
 
+import logging
 from common import post_json_with_retries
 
 class LLMProvider(ABC):
@@ -47,6 +48,8 @@ class OllamaProvider(LLMProvider):
         resp = requests.post(chat_url, json=payload, timeout=self.timeout)
         resp.raise_for_status()
         elapsed_ms = int((time.time() - started) * 1000)
+        
+        logging.info(f"[Ollama] Status: {resp.status_code}, Time: {elapsed_ms}ms")
         
         data = resp.json()
         content = data["message"]["content"]
@@ -102,6 +105,8 @@ class OpenAICompatProvider(LLMProvider):
         resp = requests.post(endpoint, json=payload, timeout=self.timeout)
         resp.raise_for_status()
         elapsed_ms = int((time.time() - started) * 1000)
+        
+        logging.info(f"[OpenAICompat] Status: {resp.status_code}, Time: {elapsed_ms}ms")
         
         data = resp.json()
         content = data["choices"][0]["message"]["content"]

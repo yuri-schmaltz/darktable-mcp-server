@@ -14,7 +14,8 @@ from common import (
     check_dependencies,
     probe_darktable_state,
     list_available_collections,
-    load_prompt
+    load_prompt,
+    setup_logging
 )
 from llm_api import OllamaProvider
 from batch_processor import BatchProcessor
@@ -60,10 +61,14 @@ def parse_args():
     p.add_argument("--list-collections", action="store_true")
     p.add_argument("--download-model")
     
+    # Logging
+    p.add_argument("--verbose", action="store_true", help="Ativa logs detalhados no console")
+    
     return p.parse_args()
 
 def main():
     args = parse_args()
+    setup_logging(verbose=args.verbose)
     
     # 1. Dependencias
     if args.check_deps:

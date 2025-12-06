@@ -9,6 +9,8 @@ import select
 import subprocess
 import time
 import io
+import logging
+import logging.handlers
 from dataclasses import dataclass
 from pathlib import Path
 from types import SimpleNamespace
@@ -26,6 +28,34 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 LOG_DIR = BASE_DIR / "logs"
 PROMPT_DIR = BASE_DIR / "config" / "prompts"
 DT_SERVER_CMD = ["lua", str(BASE_DIR / "server" / "dt_mcp_server.lua")]
+
+def setup_logging(verbose: bool = False):
+    LOG_DIR.mkdir(parents=True, exist_ok=True)
+    log_file = LOG_DIR / "mcp_host_debug.log"
+    
+    root_logger = logging.getLogger()
+    root_logger.setLevel(logging.DEBUG)  # Capture everything
+    
+    # Formatters
+    file_fmt = logging.Formatter('%(asctime)s [%(levelname)s] %(name)s: %(message)s')
+    console_fmt = logging.Formatter('[%(levelname)s] %(message)s')
+    
+    # File Handler (Rotating)
+    file_handler = logging.handlers.RotatingFileHandler(
+        log_file, maxBytes=5*1024*1024, backupCount=3, encoding='utf-8'
+    )
+    file_handler.setLevel(logging.DEBUG)
+    file_handler.setFormatter(file_fmt)
+    root_logger.addHandler(file_handler)
+    
+    # Console Handler
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.INFO if not verbose else logging.DEBUG)
+    console_handler.setFormatter(console_fmt)
+    root_logger.addHandler(console_handler)
+    
+    logging.info(f"Logging initialized. File: {log_file}")
+
 
 
 @dataclass
@@ -146,6 +176,8 @@ class McpClient:
             "params": params or {},
         }
         line = json.dumps(req)
+        logging.debug(f"MCP TX: {line}")
+        
         assert self.proc.stdin is not None
         self.proc.stdin.write(line + "\n")
         self.proc.stdin.flush()
@@ -155,6 +187,7 @@ class McpClient:
         if not ready:
             stderr_output = self._drain_stderr()
             extra = f" | stderr: {stderr_output}" if stderr_output else ""
+            logging.error(f"MCP Timeout: {extra}")
             raise TimeoutError(
                 f"Servidor MCP não respondeu em {self.response_timeout}s (timeout){extra}"
             )
@@ -163,44 +196,31 @@ class McpClient:
         if not resp_line:
             stderr_output = self._drain_stderr()
             extra = f" | stderr: {stderr_output}" if stderr_output else ""
+            logging.error(f"MCP Empty Response: {extra}")
             raise RuntimeError(f"Servidor MCP não respondeu (stdout vazio){extra}")
+            
+        logging.debug(f"MCP RX: {resp_line.strip()}")
         resp = json.loads(resp_line)
         if "error" in resp:
             raise RuntimeError(resp["error"])
         return resp["result"]
 
     def _drain_stderr(self) -> str:
-        if not self.proc.stderr:
-            return ""
-
-        try:
-            readable, _, _ = select.select([self.proc.stderr], [], [], 0)
-        except Exception:
-            return ""
-
-        if not readable:
-            return ""
-
-        captured_parts: list[str] = []
-
+        assert self.proc.stderr is not None
+        lines = []
         while True:
-            try:
-                chunk = self.proc.stderr.readline()
-            except Exception:
+            ready, _, _ = select.select([self.proc.stderr], [], [], 0)
+            if not ready:
                 break
-
-            if not chunk:
+            line = self.proc.stderr.readline()
+            if not line:
                 break
-
-            captured_parts.append(chunk.rstrip())
-
-            try:
-                if not select.select([self.proc.stderr], [], [], 0)[0]:
-                    break
-            except Exception:
-                break
-
-        return " | ".join(part for part in captured_parts if part)
+            lines.append(line.strip())
+            
+        content = " | ".join(lines)
+        if content:
+            logging.warning(f"MCP STDERR: {content}")
+        return content
 
     def __enter__(self):
         return self
