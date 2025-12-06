@@ -13,7 +13,8 @@ from common import (
     McpClient,
     check_dependencies,
     probe_darktable_state,
-    list_available_collections
+    list_available_collections,
+    load_prompt
 )
 from llm_api import OllamaProvider
 from batch_processor import BatchProcessor
@@ -24,6 +25,8 @@ CLIENT_INFO = {"name": "darktable-mcp-ollama", "version": APP_VERSION}
 DEPENDENCY_BINARIES = ["lua", "darktable-cli"]
 
 DEFAULT_OLLAMA_URL = "http://localhost:11434"
+OLLAMA_URL = DEFAULT_OLLAMA_URL
+OLLAMA_MODEL = "llama3.2"
 
 def parse_args():
     p = argparse.ArgumentParser(description="Host MCP darktable + Ollama (Refactored)")

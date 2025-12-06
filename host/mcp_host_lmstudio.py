@@ -13,7 +13,8 @@ from common import (
     McpClient,
     check_dependencies,
     probe_darktable_state,
-    list_available_collections
+    list_available_collections,
+    load_prompt
 )
 from llm_api import OpenAICompatProvider
 from batch_processor import BatchProcessor
@@ -24,6 +25,8 @@ CLIENT_INFO = {"name": "darktable-mcp-lmstudio", "version": APP_VERSION}
 DEPENDENCY_BINARIES = ["lua", "darktable-cli"]
 
 DEFAULT_LM_URL = "http://localhost:1234/v1/chat/completions"
+LMSTUDIO_URL = DEFAULT_LM_URL
+LMSTUDIO_MODEL = "local-model"
 
 def parse_args():
     p = argparse.ArgumentParser(description="Host MCP darktable + LM Studio (Refactored)")

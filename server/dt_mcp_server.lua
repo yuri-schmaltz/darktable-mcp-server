@@ -126,6 +126,47 @@ end
 
 local dt_paths = detect_darktable_paths()
 
+local function get_flatpak_runtime_libs()
+  local handle = io.popen("flatpak info org.darktable.Darktable")
+  if not handle then return {} end
+  local content = handle:read("*a")
+  handle:close()
+
+  if not content then return {} end
+
+  -- Busca linha "Runtime: ..." (funciona em inglês e pt-br se o label for "Runtime:")
+  local runtime_ref = content:match("Runtime: ([%S]+)")
+  if not runtime_ref then return {} end
+
+  -- Formato esperado: id/arch/branch (ex: org.gnome.Platform/x86_64/49)
+  local parts = {}
+  for part in runtime_ref:gmatch("[^/]+") do
+     table.insert(parts, part)
+  end
+  if #parts ~= 3 then return {} end
+  
+  local id, arch, branch = parts[1], parts[2], parts[3]
+  
+  -- Tentativa de localizar em system ou user flatpak
+  local bases = {
+      "/var/lib/flatpak/runtime/" .. id .. "/" .. arch .. "/" .. branch .. "/active/files",
+      os.getenv("HOME") .. "/.local/share/flatpak/runtime/" .. id .. "/" .. arch .. "/" .. branch .. "/active/files"
+  }
+
+  local found_paths = {}
+  for _, base in ipairs(bases) do
+      if dir_exists(base) then
+          table.insert(found_paths, base .. "/lib")
+          -- Adiciona paths comuns de distros (ex: x86_64-linux-gnu)
+          table.insert(found_paths, base .. "/lib/" .. arch .. "-linux-gnu")
+          -- Fallback genérico caso a distro do runtime seja diferente
+          table.insert(found_paths, base .. "/lib64")
+      end
+  end
+  
+  return found_paths
+end
+
 local function ensure_ld_library_path()
   if not dt_paths.is_flatpak then
     return
@@ -142,6 +183,13 @@ local function ensure_ld_library_path()
   for _, dir in ipairs({ dt_paths.prefix .. "/lib", dt_paths.prefix .. "/lib64" }) do
     if dir_exists(dir) and not ld_library_path:find(dir, 1, true) then
       table.insert(extra_paths, dir)
+    end
+  end
+
+  -- Injeta bibliotecas do Runtime Flatpak (ex: libxml2)
+  for _, dir in ipairs(get_flatpak_runtime_libs()) do
+    if dir_exists(dir) and not ld_library_path:find(dir, 1, true) then
+       table.insert(extra_paths, dir)
     end
   end
 
