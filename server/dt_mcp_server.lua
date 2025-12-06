@@ -229,12 +229,6 @@ local function ensure_ld_library_path()
   -- se o arquivo existir.
   local interpreter = arg and arg[-1] or "lua"
   
-  if file_exists(static_lua_path) then
-    -- Se achamos o estático, usamos ele. Precisamos garantir permissão x, mas já fizemos chmod.
-    interpreter = static_lua_path
-    io.stderr:write(string.format("[init] using static lua: %s\n", interpreter))
-  end
-
   local extra_args = {}
   if arg then
     for i = 1, #arg do
