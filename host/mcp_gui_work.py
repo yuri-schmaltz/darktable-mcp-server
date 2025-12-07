@@ -338,7 +338,8 @@ class MCPGui(QMainWindow):
 
         self.path_contains_edit = QLineEdit()
         self.tag_edit = QLineEdit()
-        self.collection_edit = QLineEdit()
+        self.collection_combo = QComboBox()
+        self.collection_combo.setEditable(True)
         self.prompt_edit = QLineEdit()
         self.target_edit = QLineEdit()
 
@@ -347,10 +348,14 @@ class MCPGui(QMainWindow):
         )
         self.target_edit.setToolTip("Diretório onde as exportações serão salvas.")
 
+        self.collection_combo.setToolTip(
+            "Selecione ou digite o caminho da coleção do Darktable."
+        )
+
         for w in (
             self.path_contains_edit,
             self.tag_edit,
-            self.collection_edit,
+            self.collection_combo,
             self.prompt_edit,
             self.target_edit,
         ):
@@ -374,7 +379,7 @@ class MCPGui(QMainWindow):
         collection_row_layout = QHBoxLayout(collection_row_widget)
         collection_row_layout.setContentsMargins(0, 0, 0, 0)
         collection_row_layout.setSpacing(10)
-        collection_row_layout.addWidget(self.collection_edit, stretch=1)
+        collection_row_layout.addWidget(self.collection_combo, stretch=1)
         collection_row_layout.addStretch()
         collection_row_layout.addWidget(self.darktable_probe_button)
 
