@@ -63,6 +63,7 @@ class MCPGui(QMainWindow):
     progress_signal = Signal(bool)
     error_signal = Signal(str)
     models_signal = Signal(list)
+    collections_signal = Signal(list)
 
     def __init__(self) -> None:
         super().__init__()
@@ -84,6 +85,7 @@ class MCPGui(QMainWindow):
         self.progress_signal.connect(self._toggle_progress)
         self.error_signal.connect(self._show_error)
         self.models_signal.connect(self._update_model_options)
+        self.collections_signal.connect(self._populate_collections)
 
         self._apply_global_style()
         self._build_layout()
@@ -336,7 +338,8 @@ class MCPGui(QMainWindow):
 
         self.path_contains_edit = QLineEdit()
         self.tag_edit = QLineEdit()
-        self.collection_edit = QLineEdit()
+        self.collection_combo = QComboBox()
+        self.collection_combo.setEditable(True)
         self.prompt_edit = QLineEdit()
         self.target_edit = QLineEdit()
 
@@ -345,10 +348,14 @@ class MCPGui(QMainWindow):
         )
         self.target_edit.setToolTip("Diretório onde as exportações serão salvas.")
 
+        self.collection_combo.setToolTip(
+            "Selecione ou digite o caminho da coleção do Darktable."
+        )
+
         for w in (
             self.path_contains_edit,
             self.tag_edit,
-            self.collection_edit,
+            self.collection_combo,
             self.prompt_edit,
             self.target_edit,
         ):
@@ -372,7 +379,7 @@ class MCPGui(QMainWindow):
         collection_row_layout = QHBoxLayout(collection_row_widget)
         collection_row_layout.setContentsMargins(0, 0, 0, 0)
         collection_row_layout.setSpacing(10)
-        collection_row_layout.addWidget(self.collection_edit, stretch=1)
+        collection_row_layout.addWidget(self.collection_combo, stretch=1)
         collection_row_layout.addStretch()
         collection_row_layout.addWidget(self.darktable_probe_button)
 
@@ -837,6 +844,7 @@ class MCPGui(QMainWindow):
             lambda checked: checked and self._apply_host_defaults()
         )
         self.source_combo.currentTextChanged.connect(self._update_source_fields)
+        self.source_combo.currentTextChanged.connect(self._on_source_changed)
         self.mode_combo.currentTextChanged.connect(self._update_mode_fields)
 
     def _apply_host_defaults(self) -> None:
@@ -859,7 +867,7 @@ class MCPGui(QMainWindow):
 
         self.path_contains_edit.setEnabled(is_path)
         self.tag_edit.setEnabled(is_tag)
-        self.collection_edit.setEnabled(is_collection)
+        self.collection_combo.setEnabled(is_collection)
 
         self.path_contains_edit.setToolTip(
             "Filtrar apenas por caminho contendo este trecho."
@@ -871,8 +879,8 @@ class MCPGui(QMainWindow):
             if is_tag
             else "Disponível somente quando a fonte for 'tag'."
         )
-        self.collection_edit.setToolTip(
-            "Coleção/pasta já presente no darktable."
+        self.collection_combo.setToolTip(
+            "Especifica a coleção Darktable (filme) de onde as imagens serão obtidas."
             if is_collection
             else "Disponível somente quando a fonte for 'collection'."
         )
@@ -949,7 +957,7 @@ class MCPGui(QMainWindow):
             self.source_combo,
             self.path_contains_edit,
             self.tag_edit,
-            self.collection_edit,
+            self.collection_combo,
             self.prompt_edit,
             self.prompt_button,
             self.prompt_generate_button,
@@ -1029,7 +1037,7 @@ class MCPGui(QMainWindow):
 
         path_contains = self.path_contains_edit.text().strip() or None
         tag = self.tag_edit.text().strip() or None
-        collection = self.collection_edit.text().strip() or None
+        collection = self.collection_combo.currentText().strip() or None
 
         prompt_file_input = self.prompt_edit.text().strip() or None
         prompt_file = Path(prompt_file_input).expanduser() if prompt_file_input else None
@@ -1245,6 +1253,54 @@ class MCPGui(QMainWindow):
         elif models:
             self.model_combo.setCurrentText(models[0])
         self.model_combo.blockSignals(False)
+
+    def _on_source_changed(self, source: str) -> None:
+        """Auto-fetch collections when source is set to 'collection'."""
+        if source == "collection":
+            self._fetch_and_populate_collections()
+
+    def _fetch_and_populate_collections(self) -> None:
+        """Fetch collections from Darktable in a background thread."""
+        def task() -> None:
+            from common import list_available_collections, McpClient, _find_appimage, DT_SERVER_CMD
+            
+            self._append_log("[dt] Buscando coleções do Darktable...")
+            try:
+                appimage = _find_appimage()
+                with McpClient(DT_SERVER_CMD, MCP_PROTOCOL_VERSION, GUI_CLIENT_INFO, appimage_path=appimage) as client:
+                    client.initialize()
+                    collections_data = list_available_collections(client)
+                    
+                collections = [c.get("path", "") for c in collections_data if c.get("path")]
+                self._append_log(f"[dt] {len(collections)} coleção(ões) encontrada(s).")
+                
+                self.status_signal.emit(f"{len(collections)} coleção(ões) disponível(is).")
+                self.collections_signal.emit(collections)
+                
+            except Exception as e:
+                self._append_log(f"[erro] Falha ao buscar coleções: {e}")
+                self.status_signal.emit("Erro ao buscar coleções.")
+                self.collections_signal.emit([])
+
+        self._run_async("Buscando coleções...", task)
+
+    @Slot(list)
+    def _populate_collections(self, collections: list[str]) -> None:
+        """Populate collection combo with fetched collections."""
+        current = self.collection_combo.currentText().strip()
+        
+        self.collection_combo.blockSignals(True)
+        self.collection_combo.clear()
+        for collection in collections:
+            self.collection_combo.addItem(collection)
+        
+        if current and current not in collections:
+            self.collection_combo.insertItem(0, current)
+            self.collection_combo.setCurrentText(current)
+        elif collections:
+            self.collection_combo.setCurrentIndex(0)
+        self.collection_combo.blockSignals(False)
+
 
     def _selected_host(self) -> str:
         return "ollama" if self.host_ollama.isChecked() else "lmstudio"
