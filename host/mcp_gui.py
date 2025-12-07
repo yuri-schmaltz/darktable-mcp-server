@@ -321,7 +321,7 @@ class MCPGui(QMainWindow):
         )
 
         self.limit_spin = QSpinBox()
-        self.limit_spin.setRange(1, 2000)
+        self.limit_spin.setRange(1, 100000)
         self.limit_spin.setValue(DEFAULT_LIMIT)
         self.limit_spin.setToolTip(
             "Quantidade máxima de imagens processadas nesta execução."
