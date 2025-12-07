@@ -63,6 +63,7 @@ class MCPGui(QMainWindow):
     progress_signal = Signal(bool)
     error_signal = Signal(str)
     models_signal = Signal(list)
+    collections_signal = Signal(list)
 
     def __init__(self) -> None:
         super().__init__()
@@ -84,6 +85,7 @@ class MCPGui(QMainWindow):
         self.progress_signal.connect(self._toggle_progress)
         self.error_signal.connect(self._show_error)
         self.models_signal.connect(self._update_model_options)
+        self.collections_signal.connect(self._populate_collections)
 
         self._apply_global_style()
         self._build_layout()
