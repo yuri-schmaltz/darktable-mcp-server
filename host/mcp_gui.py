@@ -1037,7 +1037,12 @@ class MCPGui(QMainWindow):
 
         path_contains = self.path_contains_edit.text().strip() or None
         tag = self.tag_edit.text().strip() or None
-        collection = self.collection_combo.currentText().strip() or None
+        
+        # Get full path from UserRole data (falls back to text if manually entered)
+        collection = self.collection_combo.currentData(Qt.ItemDataRole.UserRole)
+        if not collection:
+            # Fallback to text if no data (manual entry case)
+            collection = self.collection_combo.currentText().strip() or None
 
         prompt_file_input = self.prompt_edit.text().strip() or None
         prompt_file = Path(prompt_file_input).expanduser() if prompt_file_input else None
@@ -1287,18 +1292,45 @@ class MCPGui(QMainWindow):
     @Slot(list)
     def _populate_collections(self, collections: list[str]) -> None:
         """Populate collection combo with fetched collections."""
-        current = self.collection_combo.currentText().strip()
+        from pathlib import Path
+        
+        # Get current selection (could be full path or basename)
+        current_data = self.collection_combo.currentData(Qt.ItemDataRole.UserRole)
+        current_text = self.collection_combo.currentText().strip()
         
         self.collection_combo.blockSignals(True)
         self.collection_combo.clear()
-        for collection in collections:
-            self.collection_combo.addItem(collection)
         
-        if current and current not in collections:
-            self.collection_combo.insertItem(0, current)
-            self.collection_combo.setCurrentText(current)
-        elif collections:
+        for collection in collections:
+            # Extract basename for display
+            basename = Path(collection).name
+            
+            # Add item with basename as display text
+            self.collection_combo.addItem(basename)
+            
+            # Store full path as UserRole data for retrieval
+            idx = self.collection_combo.count() - 1
+            self.collection_combo.setItemData(idx, collection, Qt.ItemDataRole.UserRole)
+            
+            # Set tooltip to show full path on hover
+            self.collection_combo.setItemData(idx, collection, Qt.ItemDataRole.ToolTipRole)
+        
+        # Restore previous selection if it exists
+        if current_data:
+            # Try to find by full path
+            for i in range(self.collection_combo.count()):
+                if self.collection_combo.itemData(i, Qt.ItemDataRole.UserRole) == current_data:
+                    self.collection_combo.setCurrentIndex(i)
+                    break
+        elif current_text and not collections:
+            # If manually entered and no collections loaded, preserve the text
+            self.collection_combo.addItem(current_text)
+            self.collection_combo.setItemData(0, current_text, Qt.ItemDataRole.UserRole)
             self.collection_combo.setCurrentIndex(0)
+        elif collections:
+            # Default to first collection
+            self.collection_combo.setCurrentIndex(0)
+            
         self.collection_combo.blockSignals(False)
 
 
