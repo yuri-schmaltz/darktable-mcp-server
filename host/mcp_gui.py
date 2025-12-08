@@ -157,7 +157,7 @@ class MCPGui(QMainWindow):
         tools_menu.addSeparator()
         
         clear_logs_action = QAction("Limpar &Logs", self)
-        clear_logs_action.triggered.connect(self.log_text.clear)
+        clear_logs_action.triggered.connect(lambda: self.log_text.clear())
         tools_menu.addAction(clear_logs_action)
         
         # Menu Ajuda  
