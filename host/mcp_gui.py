@@ -1086,7 +1086,11 @@ class MCPGui(QMainWindow):
 
         # Campos de configuração
         for widget in (
-            self.mode_combo,
+            self.mode_rating,
+            self.mode_tagging,
+            self.mode_export,
+            self.mode_treatment,
+            self.mode_completo,
             self.source_combo,
             self.path_contains_edit,
             self.tag_edit,

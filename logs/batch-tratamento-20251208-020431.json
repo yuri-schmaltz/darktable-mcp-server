@@ -1,0 +1,99 @@
+{
+  "timestamp": "20251208-020431",
+  "mode": "tratamento",
+  "source": "collection",
+  "images_sample": [
+    {
+      "id": 6884,
+      "rating": 1,
+      "filename": "_DSC5258.JPG",
+      "colorlabels": [],
+      "path": "/home/yurix/Google/medias/imagens/formatura/originais/evento/eliza",
+      "is_raw": false
+    },
+    {
+      "id": 6885,
+      "rating": 1,
+      "filename": "_DSC5259.JPG",
+      "colorlabels": [],
+      "path": "/home/yurix/Google/medias/imagens/formatura/originais/evento/eliza",
+      "is_raw": false
+    },
+    {
+      "id": 6886,
+      "rating": 1,
+      "filename": "_DSC5260.JPG",
+      "colorlabels": [],
+      "path": "/home/yurix/Google/medias/imagens/formatura/originais/evento/eliza",
+      "is_raw": false
+    },
+    {
+      "id": 6887,
+      "rating": 1,
+      "filename": "_DSC5261.JPG",
+      "colorlabels": [],
+      "path": "/home/yurix/Google/medias/imagens/formatura/originais/evento/eliza",
+      "is_raw": false
+    },
+    {
+      "id": 6888,
+      "rating": 1,
+      "filename": "_DSC5262.JPG",
+      "colorlabels": [],
+      "path": "/home/yurix/Google/medias/imagens/formatura/originais/evento/eliza",
+      "is_raw": false
+    },
+    {
+      "id": 6889,
+      "rating": 1,
+      "filename": "_DSC5263.JPG",
+      "colorlabels": [],
+      "path": "/home/yurix/Google/medias/imagens/formatura/originais/evento/eliza",
+      "is_raw": false
+    },
+    {
+      "id": 6890,
+      "rating": 1,
+      "filename": "_DSC5264.JPG",
+      "colorlabels": [],
+      "path": "/home/yurix/Google/medias/imagens/formatura/originais/evento/eliza",
+      "is_raw": false
+    },
+    {
+      "id": 6891,
+      "rating": 1,
+      "filename": "_DSC5265.JPG",
+      "colorlabels": [],
+      "path": "/home/yurix/Google/medias/imagens/formatura/originais/evento/eliza",
+      "is_raw": false
+    },
+    {
+      "id": 6892,
+      "rating": 1,
+      "filename": "_DSC5266.JPG",
+      "colorlabels": [],
+      "path": "/home/yurix/Google/medias/imagens/formatura/originais/evento/eliza",
+      "is_raw": false
+    },
+    {
+      "id": 6893,
+      "rating": 1,
+      "filename": "_DSC5267.JPG",
+      "colorlabels": [],
+      "path": "/home/yurix/Google/medias/imagens/formatura/originais/evento/eliza",
+      "is_raw": false
+    }
+  ],
+  "model_answer": "```json\n{\n  \"plano_de_acao\": [\n    {\n      \"etapa\": \"Preparação\",\n      \"descrição\": \"Organizar a cerimônia de formatura, incluindo a confecção de diplomas, a escolha de locais e a confecção de chapéus de formatura.\"\n    },\n    {\n      \"etapa\": \"Convite\",\n      \"descrição\": \"Enviar convites aos familiares e amigos para a cerimônia de formatura.\"\n    },\n    {\n      \"etapa\": \"Decorar o local\",\n      \"descrição\": \"Decorar o local com balões, bandeirinhas e outros elementos festivos para criar um ambiente apropriado para a cerimônia.\"\n    },\n    {\n      \"etapa\": \"Execução\",\n      \"descrição\": \"Realizar a cerimônia de formatura, incluindo a entrega dos diplomas e a celebração da conclusão do curso.\"\n    },\n    {\n      \"etapa\": \"Fotografia\",\n      \"descrição\": \"Fotografar os momentos importantes da cerimônia de formatura, como a entrega dos diplomas e a celebração da conclusão do curso.\"\n    },\n    {\n      \"etapa\": \"Comemoração\",\n      \"descrição\": \"Comemorar a conclusão do curso com um jantar ou um evento festivo para celebrar o sucesso dos formandos.\"\n    }\n  ]\n}\n```",
+  "extra": {
+    "llm": {
+      "provider": "ollama",
+      "model": "qwen2.5vl:7b",
+      "url": "http://localhost:11434",
+      "status_code": 200,
+      "latency_ms": 21339,
+      "eval_count": 325,
+      "eval_duration": 5936278181
+    }
+  }
+}
