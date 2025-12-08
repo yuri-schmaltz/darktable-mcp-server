@@ -91,6 +91,7 @@ class MCPGui(QMainWindow):
         self.progress_update_signal.connect(self._update_progress)
 
         self._apply_global_style()
+        self._build_menu_bar()
         self._build_layout()
         self._apply_defaults()
         self._connect_dynamic_behaviors()
@@ -107,6 +108,69 @@ class MCPGui(QMainWindow):
         icon = QIcon(str(icon_path))
         QApplication.setWindowIcon(icon)
         self.setWindowIcon(icon)
+
+    def _build_menu_bar(self) -> None:
+        """Cria a barra de menus com opções futuras."""
+        from PySide6.QtGui import QAction
+        
+        menubar = self.menuBar()
+        
+        # Menu Arquivo
+        file_menu = menubar.addMenu("&Arquivo")
+        
+        open_config_action = QAction("&Abrir Configuração...", self)
+        open_config_action.setShortcut("Ctrl+O")
+        open_config_action.setEnabled(False)  # Placeholder
+        file_menu.addAction(open_config_action)
+        
+        save_config_action = QAction("&Salvar Configuração...", self)
+        save_config_action.setShortcut("Ctrl+S")
+        save_config_action.setEnabled(False)  # Placeholder
+        file_menu.addAction(save_config_action)
+        
+        file_menu.addSeparator()
+        
+        exit_action = QAction("&Sair", self)
+        exit_action.setShortcut("Ctrl+Q")
+        exit_action.triggered.connect(self.close)
+        file_menu.addAction(exit_action)
+        
+        # Menu Editar
+        edit_menu = menubar.addMenu("&Editar")
+        
+        preferences_action = QAction("&Preferências...", self)
+        preferences_action.setShortcut("Ctrl+,")
+        preferences_action.setEnabled(False)  # Placeholder
+        edit_menu.addAction(preferences_action)
+        
+        # Menu Ferramentas
+        tools_menu = menubar.addMenu("Ferramen&tas")
+        
+        check_dt_action = QAction("Verificar &Darktable", self)
+        check_dt_action.triggered.connect(self._probe_darktable_connection)
+        tools_menu.addAction(check_dt_action)
+        
+        check_llm_action = QAction("Verificar &LLM", self)
+        check_llm_action.triggered.connect(self._check_connection_and_fetch_models)
+        tools_menu.addAction(check_llm_action)
+        
+        tools_menu.addSeparator()
+        
+        clear_logs_action = QAction("Limpar &Logs", self)
+        clear_logs_action.triggered.connect(self.log_text.clear)
+        tools_menu.addAction(clear_logs_action)
+        
+        # Menu Ajuda  
+        help_menu = menubar.addMenu("Aj&uda")
+        
+        docs_action = QAction("&Documentação", self)
+        docs_action.setEnabled(False)  # Placeholder
+        help_menu.addAction(docs_action)
+        
+        about_action = QAction("&Sobre", self)
+        about_action.setEnabled(False)  # Placeholder
+        help_menu.addAction(about_action)
+
 
     def _apply_global_style(self) -> None:
         """Tema dark consistente e componentes padronizados."""
