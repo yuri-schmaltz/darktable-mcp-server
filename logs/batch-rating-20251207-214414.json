@@ -1,0 +1,1619 @@
+{
+  "timestamp": "20251207-214414",
+  "mode": "rating",
+  "source": "collection",
+  "images_sample": [
+    {
+      "colorlabels": [],
+      "filename": "_DSC5752.JPG",
+      "id": 3497,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5753.JPG",
+      "id": 3498,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5754.JPG",
+      "id": 3499,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5755.JPG",
+      "id": 3500,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5756.JPG",
+      "id": 3501,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5757.JPG",
+      "id": 3502,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5758.JPG",
+      "id": 3503,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5759.JPG",
+      "id": 3504,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5760.JPG",
+      "id": 3505,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5761.JPG",
+      "id": 3506,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5762.JPG",
+      "id": 3507,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5763.JPG",
+      "id": 3508,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5764.JPG",
+      "id": 3509,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5765.JPG",
+      "id": 3510,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5766.JPG",
+      "id": 3511,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5767.JPG",
+      "id": 3512,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5768.JPG",
+      "id": 3513,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5769.JPG",
+      "id": 3514,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5770.JPG",
+      "id": 3515,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5771.JPG",
+      "id": 3516,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5772.JPG",
+      "id": 3517,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5773.JPG",
+      "id": 3518,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5774.JPG",
+      "id": 3519,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5775.JPG",
+      "id": 3520,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5776.JPG",
+      "id": 3521,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5777.JPG",
+      "id": 3522,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5778.JPG",
+      "id": 3523,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5779.JPG",
+      "id": 3524,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5780.JPG",
+      "id": 3525,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5781.JPG",
+      "id": 3526,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5782.JPG",
+      "id": 3527,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5783.JPG",
+      "id": 3528,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5784.JPG",
+      "id": 3529,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5785.JPG",
+      "id": 3530,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5786.JPG",
+      "id": 3531,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5787.JPG",
+      "id": 3532,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5788.JPG",
+      "id": 3533,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5789.JPG",
+      "id": 3534,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5790.JPG",
+      "id": 3535,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5791.JPG",
+      "id": 3536,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5792.JPG",
+      "id": 3537,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5793.JPG",
+      "id": 3538,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5794.JPG",
+      "id": 3539,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5795.JPG",
+      "id": 3540,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5796.JPG",
+      "id": 3541,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5797.JPG",
+      "id": 3542,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5798.JPG",
+      "id": 3543,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5799.JPG",
+      "id": 3544,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5800.JPG",
+      "id": 3545,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5801.JPG",
+      "id": 3546,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5802.JPG",
+      "id": 3547,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5803.JPG",
+      "id": 3548,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5804.JPG",
+      "id": 3549,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5805.JPG",
+      "id": 3550,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5806.JPG",
+      "id": 3551,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5807.JPG",
+      "id": 3552,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5808.JPG",
+      "id": 3553,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5809.JPG",
+      "id": 3554,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5810.JPG",
+      "id": 3555,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5813.JPG",
+      "id": 3556,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5814.JPG",
+      "id": 3557,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5815.JPG",
+      "id": 3558,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5816.JPG",
+      "id": 3559,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5817.JPG",
+      "id": 3560,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5818.JPG",
+      "id": 3561,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5819.JPG",
+      "id": 3562,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5820.JPG",
+      "id": 3563,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5821.JPG",
+      "id": 3564,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5822.JPG",
+      "id": 3565,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5823.JPG",
+      "id": 3566,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5824.JPG",
+      "id": 3567,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5825.JPG",
+      "id": 3568,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5826.JPG",
+      "id": 3569,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5827.JPG",
+      "id": 3570,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5828.JPG",
+      "id": 3571,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5829.JPG",
+      "id": 3572,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5830.JPG",
+      "id": 3573,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5831.JPG",
+      "id": 3574,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5832.JPG",
+      "id": 3575,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5833.JPG",
+      "id": 3576,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5834.JPG",
+      "id": 3577,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5835.JPG",
+      "id": 3578,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5836.JPG",
+      "id": 3579,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5837.JPG",
+      "id": 3580,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5838.JPG",
+      "id": 3581,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5839.JPG",
+      "id": 3582,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5840.JPG",
+      "id": 3583,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5841.JPG",
+      "id": 3584,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5842.JPG",
+      "id": 3585,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5843.JPG",
+      "id": 3586,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5844.JPG",
+      "id": 3587,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5845.JPG",
+      "id": 3588,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5846.JPG",
+      "id": 3589,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5847.JPG",
+      "id": 3590,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5848.JPG",
+      "id": 3591,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5849.JPG",
+      "id": 3592,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5850.JPG",
+      "id": 3593,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5851.JPG",
+      "id": 3594,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5852.JPG",
+      "id": 3595,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5853.JPG",
+      "id": 3596,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5854.JPG",
+      "id": 3597,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5855.JPG",
+      "id": 3598,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5856.JPG",
+      "id": 3599,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5857.JPG",
+      "id": 3600,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5858.JPG",
+      "id": 3601,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5859.JPG",
+      "id": 3602,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5860.JPG",
+      "id": 3603,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5861.JPG",
+      "id": 3604,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5862.JPG",
+      "id": 3605,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5863.JPG",
+      "id": 3606,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5864.JPG",
+      "id": 3607,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5865.JPG",
+      "id": 3608,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5866.JPG",
+      "id": 3609,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5867.JPG",
+      "id": 3610,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5868.JPG",
+      "id": 3611,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5869.JPG",
+      "id": 3612,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5870.JPG",
+      "id": 3613,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5871.JPG",
+      "id": 3614,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5872.JPG",
+      "id": 3615,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5873.JPG",
+      "id": 3616,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5874.JPG",
+      "id": 3617,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5875.JPG",
+      "id": 3618,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5876.JPG",
+      "id": 3619,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5877.JPG",
+      "id": 3620,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5878.JPG",
+      "id": 3621,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5879.JPG",
+      "id": 3622,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5880.JPG",
+      "id": 3623,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5881.JPG",
+      "id": 3624,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5882.JPG",
+      "id": 3625,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5883.JPG",
+      "id": 3626,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5884.JPG",
+      "id": 3627,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5885.JPG",
+      "id": 3628,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5886.JPG",
+      "id": 3629,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5887.JPG",
+      "id": 3630,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5888.JPG",
+      "id": 3631,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5889.JPG",
+      "id": 3632,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5890.JPG",
+      "id": 3633,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5891.JPG",
+      "id": 3634,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5892.JPG",
+      "id": 3635,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5893.JPG",
+      "id": 3636,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5894.JPG",
+      "id": 3637,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5895.JPG",
+      "id": 3638,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5896.JPG",
+      "id": 3639,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5897.JPG",
+      "id": 3640,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5898.JPG",
+      "id": 3641,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5899.JPG",
+      "id": 3642,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5900.JPG",
+      "id": 3643,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5901.JPG",
+      "id": 3644,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5902.JPG",
+      "id": 3645,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5903.JPG",
+      "id": 3646,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5904.JPG",
+      "id": 3647,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5905.JPG",
+      "id": 3648,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5906.JPG",
+      "id": 3649,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5907.JPG",
+      "id": 3650,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5908.JPG",
+      "id": 3651,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5909.JPG",
+      "id": 3652,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5910.JPG",
+      "id": 3653,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5911.JPG",
+      "id": 3654,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5912.JPG",
+      "id": 3655,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5913.JPG",
+      "id": 3656,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5914.JPG",
+      "id": 3657,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5915.JPG",
+      "id": 3658,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5916.JPG",
+      "id": 3659,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5917.JPG",
+      "id": 3660,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5918.JPG",
+      "id": 3661,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5919.JPG",
+      "id": 3662,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5920.JPG",
+      "id": 3663,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5921.JPG",
+      "id": 3664,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5922.JPG",
+      "id": 3665,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5923.JPG",
+      "id": 3666,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5924.JPG",
+      "id": 3667,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5925.JPG",
+      "id": 3668,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5926.JPG",
+      "id": 3669,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5927.JPG",
+      "id": 3670,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5928.JPG",
+      "id": 3671,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5929.JPG",
+      "id": 3672,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5930.JPG",
+      "id": 3673,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5931.JPG",
+      "id": 3674,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5932.JPG",
+      "id": 3675,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5933.JPG",
+      "id": 3676,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5934.JPG",
+      "id": 3677,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5935.JPG",
+      "id": 3678,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5936.JPG",
+      "id": 3679,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5937.JPG",
+      "id": 3680,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5938.JPG",
+      "id": 3681,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5939.JPG",
+      "id": 3682,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5940.JPG",
+      "id": 3683,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5941.JPG",
+      "id": 3684,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5942.JPG",
+      "id": 3685,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5943.JPG",
+      "id": 3686,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5944.JPG",
+      "id": 3687,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5945.JPG",
+      "id": 3688,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5946.JPG",
+      "id": 3689,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5947.JPG",
+      "id": 3690,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5948.JPG",
+      "id": 3691,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5949.JPG",
+      "id": 3692,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5950.JPG",
+      "id": 3693,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5951.JPG",
+      "id": 3694,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5952.JPG",
+      "id": 3695,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    },
+    {
+      "colorlabels": [],
+      "filename": "_DSC5953.JPG",
+      "id": 3696,
+      "rating": 1,
+      "is_raw": false,
+      "path": "/home/yurix/Google/medias/imagens/amelie"
+    }
+  ],
+  "model_answer": "Aqui está um exemplo de plano de ação em JSON:\n\n```\n{\n  \"plano_de_ação\": {\n    \"etapa_1\": {\n      \"descricao\": \"Coletar dados\",\n      \"atividades\": [\n        {\"atividade\": \"Coleta de dados iniciais\", \"data\": \"2023-02-20\"},\n        {\"atividade\": \"Análise dos dados coletados\", \"data\": \"2023-02-25\"}\n      ]\n    },\n    \"etapa_2\": {\n      \"descricao\": \"Análise e interpretação dos dados\",\n      \"atividades\": [\n        {\"atividade\": \"Avaliação do resultado da análise\", \"data\": \"2023-03-01\"},\n        {\"atividade\": \"Preparação do relatório final\", \"data\": \"2023-03-10\"}\n      ]\n    },\n    \"etapa_3\": {\n      \"descricao\": \"Relatório final e apresentação\",\n      \"atividades\": [\n        {\"atividade\": \"Apresentação do relatório final ao cliente\", \"data\": \"2023-03-15\"},\n        {\"atividade\": \"Feedback e ajustes finais\", \"data\": \"2023-03-20\"}\n      ]\n    }\n  }\n}\n```\n\nEste plano de ação inclui três etapas, cada uma com suas atividades específicas e datas. É importante notar que as datas são apenas exemplos e podem variar de acordo com as necessidades do projeto.",
+  "extra": {
+    "llm": {
+      "provider": "ollama",
+      "model": "llama3.2",
+      "url": "http://localhost:11434",
+      "status_code": 200,
+      "latency_ms": 11043,
+      "eval_count": 321,
+      "eval_duration": 3149431506
+    }
+  }
+}
