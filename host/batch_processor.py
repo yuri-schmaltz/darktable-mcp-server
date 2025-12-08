@@ -106,6 +106,10 @@ class BatchProcessor:
             print(f"Modo desconhecido: {mode}")
 
     def _process_common(self, mode: str, args):
+        # Log active configuration
+        config_dict = {k: v for k, v in vars(args).items() if k not in ["func", "prompt_file"]}
+        logging.info(f"[{mode}] Configuração ativa: {config_dict}")
+        
         images = fetch_images(self.client, args)
         logging.info(f"[{mode}] Imagens filtradas: {len(images)}")
         if not images:
@@ -239,14 +243,89 @@ class BatchProcessor:
             append_export_result_to_log(log_file, res)
 
     def run_mode_tratamento(self, args):
-        # Tratamento geralmente só gera plano, não aplica ação automática no darktable (ainda)
         answer, _ = self._process_common("tratamento", args)
-        if answer:
-            print("[tratamento] Plano gerado (ver log ou saída acima).")
+        if not answer: return
+
+        try:
+            json_str = extract_json_from_markdown(answer)
+            parsed = json.loads(json_str)
+            # Expecting schema: {"treatments": [{"id": 123, "rating": 5, "color_label": "green", "notes": "..."}]}
+            treatments = parsed.get("treatments", [])
+        except Exception as e:
+            print(f"[tratamento] Erro JSON: {e}")
+            return
+
+        if not treatments:
+            print("[tratamento] Nenhuma sugestão recebida.")
+            return
+
+        print(f"[tratamento] Processando {len(treatments)} sugestões...")
+        
+        rating_edits = []
+        color_edits = []
+        
+        for t in treatments:
+            tid = t.get("id")
+            if not tid: continue
+            
+            # Prepare batch edits
+            if "rating" in t:
+                rating_edits.append({"id": tid, "rating": t["rating"]})
+            if "color_label" in t:
+                color_edits.append({"id": tid, "color": t["color_label"]})
+                
+            # Log specific suggestions
+            notes = t.get("notes", "")
+            img_meta = next((img for img in (fetch_images(self.client, args) or []) if img.get("id") == tid), None)
+            name = img_meta.get("filename", f"ID {tid}") if img_meta else f"ID {tid}"
+            
+            changes = []
+            if "rating" in t: changes.append(f"Rating {t['rating']}")
+            if "color_label" in t: changes.append(f"Label {t['color_label']}")
+            
+            print(f"  • {name}: {', '.join(changes)}")
+            if notes:
+                print(f"    Sugestão: {notes}")
+
+        if self.dry_run:
+            print("[tratamento] DRY-RUN. Nenhuma alteração aplicada.")
+            return
+
+        # Apply Ratings
+        if rating_edits:
+            try:
+                self.client.call_tool("apply_batch_edits", {"edits": rating_edits})
+                print(f"[tratamento] Ratings aplicados em {len(rating_edits)} imagens.")
+            except Exception as e:
+                print(f"[tratamento] Erro ao aplicar ratings: {e}")
+
+        # Apply Color Labels
+        if color_edits:
+            try:
+                # Group by color because API might imply single color batch or loop handles it?
+                # tool_set_colorlabel_batch takes list of {id, color}.
+                self.client.call_tool("set_colorlabel_batch", {"edits": color_edits, "overwrite": True})
+                print(f"[tratamento] Color labels aplicados em {len(color_edits)} imagens.")
+            except Exception as e:
+                print(f"[tratamento] Erro ao aplicar color labels: {e}")
     
     def run_mode_completo(self, args):
-        print("[completo] Executando pipeline completo...")
+        print("="*60)
+        print("[completo] INICIANDO PIPELINE COMPLETE (Rating -> Tagging -> Tratamento -> Export)")
+        print("="*60)
+        
+        print("\n--- ETAPA 1: RATING ---\n")
         self.run_mode_rating(args)
+        
+        print("\n--- ETAPA 2: TAGGING ---\n")
         self.run_mode_tagging(args)
+        
+        print("\n--- ETAPA 3: TRATAMENTO ---\n")
         self.run_mode_tratamento(args)
+        
+        print("\n--- ETAPA 4: EXPORT ---\n")
         self.run_mode_export(args)
+        
+        print("\n" + "="*60)
+        print("[completo] PIPELINE FINALIZADO")
+        print("="*60)
