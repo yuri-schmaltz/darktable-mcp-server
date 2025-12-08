@@ -449,6 +449,10 @@ class MCPGui(QMainWindow):
             self.target_edit,
         ):
             self._style_form_field(w)
+        
+        # Extra width for path fields to show full paths
+        self.prompt_edit.setMinimumWidth(400)
+        self.target_edit.setMinimumWidth(400)
 
         config_form.addRow("Path contém:", self.path_contains_edit)
         config_form.addRow("Tag:", self.tag_edit)
@@ -703,8 +707,8 @@ class MCPGui(QMainWindow):
 
         right_column.addLayout(run_row)
 
-        content_layout.addLayout(form_column, stretch=2)
-        content_layout.addLayout(right_column, stretch=3)
+        content_layout.addLayout(form_column, stretch=3)
+        content_layout.addLayout(right_column, stretch=2)
 
         main_layout.addLayout(content_layout)
 
@@ -836,7 +840,7 @@ class MCPGui(QMainWindow):
     def _style_form_field(self, widget: QWidget) -> None:
         """Padroniza campos de formulário para largura e altura consistentes."""
 
-        widget.setMinimumWidth(260)
+        widget.setMinimumWidth(320)  # Increased from 260 to prevent cutoff
         widget.setMinimumHeight(32)
         widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
