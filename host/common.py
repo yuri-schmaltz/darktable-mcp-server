@@ -576,6 +576,7 @@ def load_prompt(
                 "basico": "tratamento_basico.md",
                 "avancado": "tratamento_avancado.md",
             },
+            "completo": "completo.md",
         }
         mode_entry = default_map.get(mode)
         if not mode_entry:
