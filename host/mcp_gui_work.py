@@ -1228,7 +1228,7 @@ class MCPGui(QMainWindow):
         text_only = not bool(self.attach_images_check.isChecked())
 
         return RunConfig(
-            # host="ollama",  # Removed from RunConfig
+            host=host,
             mode=mode,
             source=source,
             path_contains=path_contains,
@@ -1238,11 +1238,14 @@ class MCPGui(QMainWindow):
             only_raw=bool(self.only_raw_check.isChecked()),
             dry_run=bool(self.dry_run_check.isChecked()),
             limit=int(self.limit_spin.value()),
+            target_dir=target_dir,
             model=self.model_combo.currentText().strip() or model_default,
             llm_url=self.url_edit.text().strip() or url_default,
-            target_dir=target_dir,
-            prompt_file=prompt_file,
-            prompt_variant=prompt_variant,
+            prompt_file=str(prompt_file) if prompt_file else None,
+            timeout=float(self.timeout_spin.value()),
+            download_model=None,
+            prompt_variant=self.prompt_variant_combo.currentText().lower(),
+            generate_styles=bool(self.generate_styles_check.isChecked()),
             text_only=text_only,
             extra_flags=[],
         )

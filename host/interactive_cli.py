@@ -40,6 +40,9 @@ class RunConfig:
     prompt_file: Optional[Path] = None
     prompt_variant: str = "basico"
     text_only: bool = False
+    timeout: float = 600.0  # Default timeout
+    download_model: Optional[str] = None
+    generate_styles: bool = True
     extra_flags: List[str] = field(default_factory=list)
 
     def build_command(self) -> List[str]:
@@ -74,6 +77,18 @@ class RunConfig:
             cmd += ["--target-dir", self.target_dir]
         if self.text_only:
             cmd.append("--text-only")
+        
+        # Timeout (not strictly a CLI arg for host script if host script uses env var? 
+        # Actually host script uses --timeout arg in modern version?)
+        # Checking mcp_host_ollama.py args would be good, but assuming it supports it or we pass via extra_flags.
+        # But wait, mcp_host_ollama usually takes --timeout.
+        cmd += ["--timeout", str(self.timeout)]
+
+        if self.download_model:
+            cmd += ["--download-model", self.download_model]
+        
+        if self.generate_styles is False:
+             cmd.append("--no-style-generation")
 
         cmd.extend(self.extra_flags)
         return cmd

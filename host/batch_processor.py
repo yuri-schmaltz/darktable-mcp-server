@@ -302,7 +302,8 @@ class BatchProcessor:
                 print(f"    Sugestão: {notes}")
             
             # Generate and Apply Style if needed
-            if style_params and not self.dry_run:
+            generate_styles = getattr(args, "generate_styles", True) # Default to True if missing
+            if generate_styles and style_params and not self.dry_run:
                 try:
                     from style_generator import DarktableStyleGenerator
                     generator = DarktableStyleGenerator(Path.home() / ".config/darktable/styles/mcp_generated")
@@ -324,6 +325,8 @@ class BatchProcessor:
                     print(f"    [style] Estilo '{style_name}' criado e aplicado.")
                 except Exception as e:
                     print(f"    [style] Erro ao aplicar estilo: {e}")
+            elif style_params and self.dry_run:
+                 print(f"    [style] DRY-RUN: Estilo seria criado comparams {style_params}")
 
         if self.dry_run:
             print("[tratamento] DRY-RUN. Nenhuma alteração aplicada.")

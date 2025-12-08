@@ -8,3 +8,6 @@ host/__pycache__/common.cpython-312.pyc
 host/mcp_gui.py
 host/__pycache__/common.cpython-313.pyc
 logs/batch-tratamento-20251208-115807.json
+host/__pycache__/batch_processor.cpython-312.pyc
+logs/batch-tratamento-20251208-123344.json
+logs/mcp_host_debug.log
