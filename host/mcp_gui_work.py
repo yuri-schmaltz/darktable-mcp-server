@@ -1452,6 +1452,19 @@ class MCPGui(QMainWindow):
     def _selected_host(self) -> str:
         return "ollama"
 
+    def _get_selected_mode(self) -> str:
+        """Helper to get text from the selected radio button."""
+        if self.mode_rating.isChecked():
+            return "rating"
+        if self.mode_tagging.isChecked():
+            return "tagging"
+        if self.mode_export.isChecked():
+            return "export"
+        if self.mode_treatment.isChecked():
+            return "tratamento"
+        if self.mode_completo.isChecked():
+            return "completo"
+        return "rating"  # fallback
 
 def main() -> None:
     qt_app = QApplication(sys.argv)
