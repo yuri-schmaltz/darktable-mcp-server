@@ -390,12 +390,44 @@ class MCPGui(QMainWindow):
 
         # -------------------------- Campos principais ---------------------------
 
-        self.mode_combo = QComboBox()
-        self.mode_combo.addItems(["export", "rating", "tagging", "tratamento", "completo"])
-        self.mode_combo.setToolTip(
-            "Define o tipo de operação: atribuir notas, sugerir tags, exportar, tratamento "
-            "ou o fluxo completo (rating→tagging→tratamento→export)."
-        )
+        # -------------------------- Campos principais ---------------------------
+
+        # Modo de operação (Radio Buttons)
+        self.mode_group = QButtonGroup(self)
+        self.mode_rating = QRadioButton("Rating")
+        self.mode_tagging = QRadioButton("Tagging")
+        self.mode_export = QRadioButton("Export")
+        self.mode_treatment = QRadioButton("Tratamento")
+        self.mode_completo = QRadioButton("Completo")
+
+        # Configura tooltips
+        self.mode_rating.setToolTip("Atribuir notas às imagens.")
+        self.mode_tagging.setToolTip("Sugerir e aplicar tags.")
+        self.mode_export.setToolTip("Exportar imagens selecionadas.")
+        self.mode_treatment.setToolTip("Aplicar tratamento de imagem.")
+        self.mode_completo.setToolTip("Fluxo completo: Rating -> Tagging -> Tratamento -> Export.")
+
+        # Adiciona ao grupo (para exclusão mútua)
+        self.mode_group.addButton(self.mode_rating)
+        self.mode_group.addButton(self.mode_tagging)
+        self.mode_group.addButton(self.mode_export)
+        self.mode_group.addButton(self.mode_treatment)
+        self.mode_group.addButton(self.mode_completo)
+
+        # Layout horizontal para os modos
+        mode_widget = QWidget()
+        mode_layout = QHBoxLayout(mode_widget)
+        mode_layout.setContentsMargins(0, 0, 0, 0)
+        mode_layout.setSpacing(12)
+        mode_layout.addWidget(self.mode_rating)
+        mode_layout.addWidget(self.mode_tagging)
+        mode_layout.addWidget(self.mode_export)
+        mode_layout.addWidget(self.mode_treatment)
+        mode_layout.addWidget(self.mode_completo)
+        mode_layout.addStretch()
+
+        # Define padrão
+        self.mode_rating.setChecked(True)
 
         self.source_combo = QComboBox()
         self.source_combo.addItems(["all", "collection", "path", "tag"])
@@ -417,7 +449,7 @@ class MCPGui(QMainWindow):
             "Quantidade máxima de imagens processadas nesta execução."
         )
 
-        config_form.addRow("Modo:", self.mode_combo)
+        config_form.addRow("Modo:", mode_widget)
         config_form.addRow("Fonte:", self.source_combo)
         config_form.addRow("Rating mínimo:", self.min_rating_spin)
         config_form.addRow("Limite:", self.limit_spin)
@@ -529,7 +561,7 @@ class MCPGui(QMainWindow):
 
         config_form.addRow("Pasta para exportação:", target_row_widget)
 
-        # Checkboxes (Apenas RAW / Dry-run)
+        # Checkboxes (Apenas RAW / Dry-run / Imagens)
         flags_widget = QWidget()
         flags_layout = QHBoxLayout(flags_widget)
         flags_layout.setContentsMargins(0, 0, 0, 0)
@@ -538,26 +570,28 @@ class MCPGui(QMainWindow):
         self.only_raw_check = QCheckBox("Apenas RAW")
         self.dry_run_check = QCheckBox("Dry-run")
         self.dry_run_check.setChecked(True)
+        self.attach_images_check = QCheckBox("Enviar imagens ao modelo (multimodal)")
+        self.attach_images_check.setChecked(True)
+
         self.only_raw_check.setToolTip(
             "Processa somente arquivos RAW (ignora JPEGs e derivados)."
         )
         self.dry_run_check.setToolTip(
             "Simula a execução sem escrever arquivos ou alterar metadados."
         )
+        self.attach_images_check.setToolTip(
+            "Quando desmarcado, o host enviará apenas metadados e texto ao modelo, sem anexar arquivos de imagem."
+        )
 
         flags_layout.addWidget(self.only_raw_check)
         flags_layout.addWidget(self.dry_run_check)
+        flags_layout.addWidget(self.attach_images_check)
         flags_layout.addStretch()
 
         config_form.addRow("Execução:", flags_widget)
 
-        # Imagens (multimodal ou somente texto)
-        self.attach_images_check = QCheckBox("Enviar imagens ao modelo (multimodal)")
-        self.attach_images_check.setChecked(True)
-        self.attach_images_check.setToolTip(
-            "Quando desmarcado, o host enviará apenas metadados e texto ao modelo, sem anexar arquivos de imagem."
-        )
-        config_form.addRow("Imagens:", self.attach_images_check)
+        # Remove "Imagens:" row
+        # config_form.addRow("Imagens:", self.attach_images_check)
 
         self.model_combo = QComboBox()
         self.model_combo.setEditable(True)
@@ -853,7 +887,7 @@ class MCPGui(QMainWindow):
             self.prompt_edit.setText(path)
 
     def _generate_prompt_template(self) -> None:
-        mode = self.mode_combo.currentText()
+        mode = self._get_selected_mode()
         try:
             template = load_ollama_prompt(mode)
         except Exception as exc:  # pragma: no cover - apenas GUI
@@ -917,14 +951,19 @@ class MCPGui(QMainWindow):
 
         self._apply_host_defaults()
         self._update_source_fields(self.source_combo.currentText())
-        self._update_mode_fields(self.mode_combo.currentText())
+        self._update_source_fields(self.source_combo.currentText())
+        self._update_mode_fields(self._get_selected_mode())
 
     def _connect_dynamic_behaviors(self) -> None:
         # self.host_ollama.toggled.connect(...) removed
         # self.host_lmstudio.toggled.connect(...) removed
         self.source_combo.currentTextChanged.connect(self._update_source_fields)
         self.source_combo.currentTextChanged.connect(self._on_source_changed)
-        self.mode_combo.currentTextChanged.connect(self._update_mode_fields)
+        
+        # Connect button group signal
+        self.mode_group.buttonToggled.connect(
+            lambda: self._update_mode_fields(self._get_selected_mode())
+        )
 
     def _apply_host_defaults(self) -> None:
         host = "ollama"
@@ -1137,7 +1176,7 @@ class MCPGui(QMainWindow):
 
     def _build_config(self) -> RunConfig:
         host = self._selected_host()
-        mode = self.mode_combo.currentText()
+        mode = self._get_selected_mode()
         source = self.source_combo.currentText()
 
         path_contains = self.path_contains_edit.text().strip() or None
