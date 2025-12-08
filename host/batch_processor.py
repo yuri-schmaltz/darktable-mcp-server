@@ -162,12 +162,25 @@ class BatchProcessor:
             print("[rating] Nenhuma edição.")
             return
 
-        print(f"[rating] {len(edits)} edições propostas.")
+        print(f"[rating] {len(edits)} edições propostas:")
+        for edit in edits:
+            img_id = edit.get("id")
+            new_rating = edit.get("rating")
+            # Find the image metadata to get filename
+            img_meta = next((img for img in sample if img.get("id") == img_id), None)
+            if img_meta:
+                filename = img_meta.get("filename", f"ID {img_id}")
+                old_rating = img_meta.get("rating", "?")
+                print(f"  • {filename}: rating {old_rating} → {new_rating}")
+            else:
+                print(f"  • ID {img_id}: rating → {new_rating}")
+        
         if self.dry_run:
             print("[rating] DRY-RUN. Nenhuma ação tomada.")
         else:
             res = self.client.call_tool("apply_batch_edits", {"edits": edits})
-            print("[rating] Resultado:", res["content"][0]["text"])
+            result_text = res["content"][0]["text"]
+            print(f"[rating] {result_text}")
 
     def run_mode_tagging(self, args):
         answer, _ = self._process_common("tagging", args)
@@ -190,7 +203,14 @@ class BatchProcessor:
             ids = entry.get("ids", [])
             if tag and ids:
                 self.client.call_tool("tag_batch", {"tag": tag, "ids": ids})
-                print(f"[tagging] Aplicado '{tag}' em {len(ids)} fotos.")
+                # Show which images got this tag
+                tagged_files = [img.get("filename", f"ID {img.get('id')}") 
+                               for img in sample if img.get("id") in ids]
+                print(f"[tagging] Tag '{tag}' aplicada em {len(ids)} foto(s):")
+                for filename in tagged_files[:10]:  # Limit to first 10 to avoid spam
+                    print(f"  • {filename}")
+                if len(tagged_files) > 10:
+                    print(f"  ... e mais {len(tagged_files) - 10} foto(s)")
 
     def run_mode_export(self, args):
         if not args.target_dir:
