@@ -927,9 +927,7 @@ class MCPGui(QMainWindow):
         self.path_contains_edit.setPlaceholderText("/cliente-x/viagem")
         self.tag_edit.setPlaceholderText("job:cliente")
         self.prompt_edit.setPlaceholderText("Arquivo .md opcional com prompt customizado")
-        self.target_edit.setPlaceholderText(
-            "Diretório de export (necessário em export ou completo)"
-        )
+        self.target_edit.setPlaceholderText("Diretório para exportação")
         if model_line := self.model_combo.lineEdit():
             model_line.setPlaceholderText("Nome do modelo disponível no host")
         self.url_edit.setPlaceholderText("http://localhost:11434 ou http://localhost:1234/v1")
