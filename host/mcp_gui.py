@@ -16,7 +16,7 @@ from typing import Callable, Optional
 import requests
 
 from PySide6.QtCore import Qt, Signal, Slot, QSize
-from PySide6.QtGui import QIcon, QPixmap, QResizeEvent
+from PySide6.QtGui import QIcon, QPixmap, QResizeEvent, QShortcut, QKeySequence
 from PySide6.QtWidgets import (
     QApplication,
     QButtonGroup,
@@ -52,6 +52,7 @@ from mcp_host_ollama import (
     PROTOCOL_VERSION as MCP_PROTOCOL_VERSION,
     load_prompt as load_ollama_prompt,
 )
+from mcp_host_lmstudio import LMSTUDIO_MODEL, LMSTUDIO_URL
 
 GUI_CLIENT_INFO = {"name": "darktable-mcp-gui", "version": HOST_APP_VERSION}
 
@@ -94,6 +95,8 @@ class MCPGui(QMainWindow):
         self._build_layout()
         self._apply_defaults()
         self._connect_dynamic_behaviors()
+        self._setup_keyboard_shortcuts()
+        self._setup_tab_order()
 
     # ----------------------------- UI --------------------------------------------
 
@@ -268,7 +271,7 @@ class MCPGui(QMainWindow):
 
             QPushButton:disabled {
                 background-color: #2a2a2a;
-                color: #777777;
+                color: #999999;
                 border-color: #333333;
             }
 
@@ -434,12 +437,20 @@ class MCPGui(QMainWindow):
         self.source_combo.setToolTip(
             "Escolhe de onde as imagens serão obtidas: todas, por caminho, por tag ou coleção."
         )
+        self.source_combo.setAccessibleName("Fonte das imagens")
+        self.source_combo.setAccessibleDescription(
+            "Escolher de onde as imagens serão obtidas: todas, por coleção, por caminho ou por tag"
+        )
 
         self.min_rating_spin = QSpinBox()
         self.min_rating_spin.setRange(-2, 5)
         self.min_rating_spin.setValue(DEFAULT_MIN_RATING)
         self.min_rating_spin.setToolTip(
             "Nota mínima das imagens que serão consideradas (de -2 a 5)."
+        )
+        self.min_rating_spin.setAccessibleName("Rating mínimo")
+        self.min_rating_spin.setAccessibleDescription(
+            "Nota mínima das imagens a processar, de menos 2 a 5"
         )
 
         self.limit_spin = QSpinBox()
@@ -448,20 +459,61 @@ class MCPGui(QMainWindow):
         self.limit_spin.setToolTip(
             "Quantidade máxima de imagens processadas nesta execução."
         )
+        self.limit_spin.setAccessibleName("Limite de imagens")
+        self.limit_spin.setAccessibleDescription(
+            "Número máximo de imagens a processar nesta execução"
+        )
 
         config_form.addRow("Modo:", mode_widget)
         config_form.addRow("Fonte:", self.source_combo)
         config_form.addRow("Rating mínimo:", self.min_rating_spin)
         config_form.addRow("Limite:", self.limit_spin)
 
+        # Timeout para LLM
+        self.timeout_spin = QSpinBox()
+        self.timeout_spin.setRange(10, 600)
+        self.timeout_spin.setValue(60)
+        self.timeout_spin.setSuffix(" s")
+        self.timeout_spin.setToolTip(
+            "Tempo máximo de espera pela resposta do modelo LLM (10-600 segundos)."
+        )
+        self.timeout_spin.setAccessibleName("Timeout do modelo")
+        self.timeout_spin.setAccessibleDescription(
+            "Tempo máximo de espera pela resposta do modelo LLM em segundos"
+        )
+        self._style_form_field(self.timeout_spin)
+        config_form.addRow("Timeout do modelo:", self.timeout_spin)
+
         # -------------------------- Filtros e opções ---------------------------
 
         self.path_contains_edit = QLineEdit()
+        self.path_contains_edit.setAccessibleName("Filtro de caminho")
+        self.path_contains_edit.setAccessibleDescription(
+            "Filtrar imagens por trecho do caminho de arquivo"
+        )
+        
         self.tag_edit = QLineEdit()
+        self.tag_edit.setAccessibleName("Tag do Darktable")
+        self.tag_edit.setAccessibleDescription("Tag existente para filtrar imagens")
+        
         self.collection_combo = QComboBox()
         self.collection_combo.setEditable(True)
+        self.collection_combo.setAccessibleName("Coleção do Darktable")
+        self.collection_combo.setAccessibleDescription(
+            "Selecione a coleção (filme) de onde as imagens serão obtidas"
+        )
+        
         self.prompt_edit = QLineEdit()
+        self.prompt_edit.setAccessibleName("Arquivo de prompt personalizado")
+        self.prompt_edit.setAccessibleDescription(
+            "Caminho para arquivo Markdown com instruções customizadas ao modelo"
+        )
+        
         self.target_edit = QLineEdit()
+        self.target_edit.setAccessibleName("Diretório de exportação")
+        self.target_edit.setAccessibleDescription(
+            "Pasta onde os arquivos exportados serão salvos"
+        )
 
         self.prompt_edit.setToolTip(
             "Arquivo Markdown opcional com instruções adicionais para o modelo."
@@ -498,6 +550,16 @@ class MCPGui(QMainWindow):
         )
         self.darktable_probe_button.clicked.connect(self._probe_darktable_connection)
         self._standardize_button(self.darktable_probe_button, width=42)
+        
+        # Refresh collections button
+        self.refresh_collections_button = QPushButton()
+        self.refresh_collections_button.setIcon(
+            self.style().standardIcon(QStyle.StandardPixmap.SP_BrowserReload)
+        )
+        self.refresh_collections_button.setIconSize(QSize(18, 18))
+        self.refresh_collections_button.setToolTip("Atualizar lista de coleções")
+        self.refresh_collections_button.clicked.connect(lambda: self._fetch_and_populate_collections(force_refresh=True))
+        self._standardize_button(self.refresh_collections_button, width=42)
 
         collection_row_widget = QWidget()
         collection_row_layout = QHBoxLayout(collection_row_widget)
@@ -505,6 +567,7 @@ class MCPGui(QMainWindow):
         collection_row_layout.setSpacing(10)
         collection_row_layout.addWidget(self.collection_combo, stretch=1)
         collection_row_layout.addStretch()
+        collection_row_layout.addWidget(self.refresh_collections_button)
         collection_row_layout.addWidget(self.darktable_probe_button)
 
         config_form.addRow("Coleção:", collection_row_widget)
@@ -568,10 +631,31 @@ class MCPGui(QMainWindow):
         flags_layout.setSpacing(16)
 
         self.only_raw_check = QCheckBox("Apenas RAW")
+        self.only_raw_check.setAccessibleName("Apenas arquivos RAW")
+        self.only_raw_check.setAccessibleDescription(
+            "Processar somente arquivos RAW, ignorando JPEG e derivados"
+        )
+        
         self.dry_run_check = QCheckBox("Dry-run")
         self.dry_run_check.setChecked(True)
+        self.dry_run_check.setAccessibleName("Modo dry-run")
+        self.dry_run_check.setAccessibleDescription(
+            "Simular execução sem alterar arquivos ou metadados"
+        )
+        
         self.attach_images_check = QCheckBox("Enviar imagens ao modelo (multimodal)")
         self.attach_images_check.setChecked(True)
+        self.attach_images_check.setAccessibleName("Enviar imagens ao modelo")
+        self.attach_images_check.setAccessibleDescription(
+            "Anexar arquivos de imagem junto aos metadados para modelos multimodais"
+        )
+        
+        self.generate_styles_check = QCheckBox("Gerar estilos")
+        self.generate_styles_check.setChecked(True)
+        self.generate_styles_check.setAccessibleName("Gerar estilos automaticamente")
+        self.generate_styles_check.setAccessibleDescription(
+            "Gerar arquivos de estilo XMP para Darktable"
+        )
 
         self.only_raw_check.setToolTip(
             "Processa somente arquivos RAW (ignora JPEGs e derivados)."
@@ -582,10 +666,14 @@ class MCPGui(QMainWindow):
         self.attach_images_check.setToolTip(
             "Quando desmarcado, o host enviará apenas metadados e texto ao modelo, sem anexar arquivos de imagem."
         )
+        self.generate_styles_check.setToolTip(
+            "Quando ativado, o sistema gera arquivos de estilo .xmp para Darktable."
+        )
 
         flags_layout.addWidget(self.only_raw_check)
         flags_layout.addWidget(self.dry_run_check)
         flags_layout.addWidget(self.attach_images_check)
+        flags_layout.addWidget(self.generate_styles_check)
         flags_layout.addStretch()
 
         config_form.addRow("Execução:", flags_widget)
@@ -595,8 +683,16 @@ class MCPGui(QMainWindow):
 
         self.model_combo = QComboBox()
         self.model_combo.setEditable(True)
+        self.model_combo.setAccessibleName("Modelo LLM")
+        self.model_combo.setAccessibleDescription(
+            "Nome do modelo de linguagem carregado no servidor"
+        )
+        
         self.url_edit = QLineEdit()
         self.url_edit.setToolTip("URL base do servidor LLM escolhido.")
+        self.url_edit.setAccessibleName("URL do servidor LLM")
+        self.url_edit.setAccessibleDescription("Endereço base do servidor Ollama ou LM Studio")
+        
         self.model_combo.setToolTip("Nome do modelo carregado no servidor selecionado.")
         self.check_models_button = QPushButton()
         self.check_models_button.setIcon(
@@ -696,6 +792,10 @@ class MCPGui(QMainWindow):
         self.run_button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.run_button.setMinimumWidth(0)
         self.run_button.setToolTip("Inicia o host com os parâmetros configurados.")
+        self.run_button.setAccessibleName("Executar host")
+        self.run_button.setAccessibleDescription(
+            "Iniciar processamento com os parâmetros configurados"
+        )
         self.run_button.clicked.connect(self.run_host)
 
         self.stop_button = QPushButton()
@@ -705,6 +805,8 @@ class MCPGui(QMainWindow):
         )
         self.stop_button.setIconSize(QSize(18, 18))
         self.stop_button.setToolTip("Encerrar processamento")
+        self.stop_button.setAccessibleName("Parar execução")
+        self.stop_button.setAccessibleDescription("Interromper o processamento em andamento")
         self.stop_button.setEnabled(False)  # Initially disabled
         self.stop_button.clicked.connect(self._stop_processing)
         self.stop_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
@@ -964,6 +1066,80 @@ class MCPGui(QMainWindow):
         self.mode_group.buttonToggled.connect(
             lambda: self._update_mode_fields(self._get_selected_mode())
         )
+    
+    def _setup_keyboard_shortcuts(self) -> None:
+        """Configure keyboard shortcuts for common actions."""
+        # Ctrl+R / F5: Run host
+        run_shortcut = QShortcut(QKeySequence("Ctrl+R"), self)
+        run_shortcut.activated.connect(self.run_host)
+        run_f5 = QShortcut(QKeySequence("F5"), self)
+        run_f5.activated.connect(self.run_host)
+        
+        # Ctrl+E / Escape: Stop execution
+        stop_shortcut = QShortcut(QKeySequence("Ctrl+E"), self)
+        stop_shortcut.activated.connect(self._stop_processing)
+        esc_shortcut = QShortcut(QKeySequence("Escape"), self)
+        esc_shortcut.activated.connect(self._stop_processing)
+        
+        # Ctrl+L: Clear log
+        clear_log_shortcut = QShortcut(QKeySequence("Ctrl+L"), self)
+        clear_log_shortcut.activated.connect(self.log_text.clear)
+        
+        # Ctrl+T: Test Darktable connection
+        probe_shortcut = QShortcut(QKeySequence("Ctrl+T"), self)
+        probe_shortcut.activated.connect(self._probe_darktable_connection)
+        
+        # Ctrl+M: Check models
+        models_shortcut = QShortcut(QKeySequence("Ctrl+M"), self)
+        models_shortcut.activated.connect(self._check_connection_and_fetch_models)
+        
+        # Ctrl+O: Open prompt file
+        prompt_shortcut = QShortcut(QKeySequence("Ctrl+O"), self)
+        prompt_shortcut.activated.connect(self._choose_prompt_file)
+        
+        # F1: Show help/shortcuts
+        help_shortcut = QShortcut(QKeySequence("F1"), self)
+        help_shortcut.activated.connect(self._show_keyboard_shortcuts)
+    
+    def _setup_tab_order(self) -> None:
+        """Configure logical tab order for keyboard navigation."""
+        self.setTabOrder(self.source_combo, self.path_contains_edit)
+        self.setTabOrder(self.path_contains_edit, self.tag_edit)
+        self.setTabOrder(self.tag_edit, self.collection_combo)
+        self.setTabOrder(self.collection_combo, self.min_rating_spin)
+        self.setTabOrder(self.min_rating_spin, self.limit_spin)
+        self.setTabOrder(self.limit_spin, self.timeout_spin)
+        self.setTabOrder(self.timeout_spin, self.prompt_edit)
+        self.setTabOrder(self.prompt_edit, self.prompt_button)
+        self.setTabOrder(self.prompt_button, self.target_edit)
+        self.setTabOrder(self.target_edit, self.target_button)
+        self.setTabOrder(self.target_button, self.only_raw_check)
+        self.setTabOrder(self.only_raw_check, self.dry_run_check)
+        self.setTabOrder(self.dry_run_check, self.attach_images_check)
+        self.setTabOrder(self.attach_images_check, self.generate_styles_check)
+        self.setTabOrder(self.generate_styles_check, self.model_combo)
+        self.setTabOrder(self.model_combo, self.url_edit)
+        self.setTabOrder(self.url_edit, self.check_models_button)
+        self.setTabOrder(self.check_models_button, self.prompt_variant_combo)
+        self.setTabOrder(self.prompt_variant_combo, self.run_button)
+        self.setTabOrder(self.run_button, self.stop_button)
+    
+    def _show_keyboard_shortcuts(self) -> None:
+        """Display keyboard shortcuts help dialog."""
+        shortcuts_text = """
+<h3>Atalhos de Teclado</h3>
+<table>
+<tr><td><b>Ctrl+R / F5</b></td><td>Executar host</td></tr>
+<tr><td><b>Ctrl+E / ESC</b></td><td>Parar execução</td></tr>
+<tr><td><b>Ctrl+L</b></td><td>Limpar log</td></tr>
+<tr><td><b>Ctrl+T</b></td><td>Testar conexão Darktable</td></tr>
+<tr><td><b>Ctrl+M</b></td><td>Verificar modelos disponíveis</td></tr>
+<tr><td><b>Ctrl+O</b></td><td>Abrir arquivo de prompt</td></tr>
+<tr><td><b>F1</b></td><td>Mostrar este help</td></tr>
+<tr><td><b>Tab</b></td><td>Navegar entre campos</td></tr>
+</table>
+"""
+        QMessageBox.information(self, "Atalhos de Teclado", shortcuts_text)
 
     def _apply_host_defaults(self) -> None:
         host = "ollama"
@@ -1102,9 +1278,11 @@ class MCPGui(QMainWindow):
             self.target_button,
             self.min_rating_spin,
             self.limit_spin,
+            self.timeout_spin,
             self.only_raw_check,
             self.dry_run_check,
             self.attach_images_check,
+            self.generate_styles_check,
             # self.host_ollama,   -- Removed
             # self.host_lmstudio, -- Removed
             self.model_combo,
@@ -1386,9 +1564,21 @@ class MCPGui(QMainWindow):
         if source == "collection":
             self._fetch_and_populate_collections()
 
-    def _fetch_and_populate_collections(self) -> None:
-        """Fetch collections from Darktable in a background thread."""
+    def _fetch_and_populate_collections(self, force_refresh: bool = False) -> None:
+        """Fetch collections from Darktable in a background thread, with caching."""
+        import time
+        
+        # Check cache if not forcing refresh
+        if not force_refresh and self._collections_cache is not None:
+            cached_time, cached_collections = self._collections_cache
+            age = time.time() - cached_time
+            if age < self._collections_cache_ttl:
+                self._append_log(f"[cache] Usando coleções em cache ({age:.1f}s de idade)")
+                self.collections_signal.emit(cached_collections)
+                return
+        
         def task() -> None:
+            import time
             from common import list_available_collections, McpClient, _find_appimage, DT_SERVER_CMD
             
             self._append_log("[dt] Buscando coleções do Darktable...")
@@ -1400,6 +1590,9 @@ class MCPGui(QMainWindow):
                     
                 collections = [c.get("path", "") for c in collections_data if c.get("path")]
                 self._append_log(f"[dt] {len(collections)} coleção(ões) encontrada(s).")
+                
+                # Update cache
+                self._collections_cache = (time.time(), collections)
                 
                 self.status_signal.emit(f"{len(collections)} coleção(ões) disponível(is).")
                 self.collections_signal.emit(collections)

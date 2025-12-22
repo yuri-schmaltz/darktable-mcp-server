@@ -924,6 +924,15 @@ local function tool_export_collection(args)
     )
   end
 
+  -- Rejeitar paths absolutos para prevenir escrita fora do workspace
+  if target_dir:sub(1, 1) == "/" then
+    return mcp_error(
+      "target_dir não pode ser um caminho absoluto",
+      "invalid_target_dir",
+      "target_dir"
+    )
+  end
+
   local format    = (args.format or "jpg"):lower()
   local overwrite = args.overwrite or false
 
