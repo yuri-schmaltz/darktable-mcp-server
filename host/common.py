@@ -29,24 +29,44 @@ LOG_DIR = BASE_DIR / "logs"
 PROMPT_DIR = BASE_DIR / "config" / "prompts"
 DT_SERVER_CMD = ["lua", str(BASE_DIR / "server" / "dt_mcp_server.lua")]
 
-def setup_logging(verbose: bool = False):
+def setup_logging(verbose: bool = False, json_logging: bool = True):
+    """Setup logging with optional JSON format for structured logs."""
     LOG_DIR.mkdir(parents=True, exist_ok=True)
     log_file = LOG_DIR / "mcp_host_debug.log"
+    json_log_file = LOG_DIR / "mcp_host_structured.json"
     
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.DEBUG)  # Capture everything
     
-    # Formatters
+    # Standard formatter for text logs
     file_fmt = logging.Formatter('%(asctime)s [%(levelname)s] %(name)s: %(message)s')
     console_fmt = logging.Formatter('[%(levelname)s] %(message)s')
     
-    # File Handler (Rotating)
+    # File Handler (Rotating) - Text format
     file_handler = logging.handlers.RotatingFileHandler(
         log_file, maxBytes=5*1024*1024, backupCount=3, encoding='utf-8'
     )
     file_handler.setLevel(logging.DEBUG)
     file_handler.setFormatter(file_fmt)
     root_logger.addHandler(file_handler)
+    
+    # JSON File Handler (if enabled)
+    if json_logging:
+        try:
+            from pythonjsonlogger import jsonlogger
+            
+            json_handler = logging.handlers.RotatingFileHandler(
+                json_log_file, maxBytes=5*1024*1024, backupCount=3, encoding='utf-8'
+            )
+            json_handler.setLevel(logging.DEBUG)
+            json_fmt = jsonlogger.JsonFormatter(
+                '%(asctime)s %(levelname)s %(name)s %(message)s %(pathname)s %(lineno)d'
+            )
+            json_handler.setFormatter(json_fmt)
+            root_logger.addHandler(json_handler)
+            logging.info(f"JSON logging enabled: {json_log_file}")
+        except ImportError:
+            logging.warning("python-json-logger not installed, skipping JSON logs")
     
     # Console Handler
     console_handler = logging.StreamHandler()
