@@ -24,7 +24,7 @@ def test_run_config():
     config = RunConfig(
         mode="rating",
         source="all",
-        path_filter=None,
+        path_contains=None,
         tag=None,
         collection=None,
         min_rating=DEFAULT_MIN_RATING,
