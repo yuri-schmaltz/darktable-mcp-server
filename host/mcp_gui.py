@@ -52,6 +52,7 @@ from mcp_host_ollama import (
     PROTOCOL_VERSION as MCP_PROTOCOL_VERSION,
     load_prompt as load_ollama_prompt,
 )
+from mcp_host_lmstudio import LMSTUDIO_MODEL, LMSTUDIO_URL
 
 GUI_CLIENT_INFO = {"name": "darktable-mcp-gui", "version": HOST_APP_VERSION}
 
@@ -454,6 +455,17 @@ class MCPGui(QMainWindow):
         config_form.addRow("Rating mínimo:", self.min_rating_spin)
         config_form.addRow("Limite:", self.limit_spin)
 
+        # Timeout para LLM
+        self.timeout_spin = QSpinBox()
+        self.timeout_spin.setRange(10, 600)
+        self.timeout_spin.setValue(60)
+        self.timeout_spin.setSuffix(" s")
+        self.timeout_spin.setToolTip(
+            "Tempo máximo de espera pela resposta do modelo LLM (10-600 segundos)."
+        )
+        self._style_form_field(self.timeout_spin)
+        config_form.addRow("Timeout do modelo:", self.timeout_spin)
+
         # -------------------------- Filtros e opções ---------------------------
 
         self.path_contains_edit = QLineEdit()
@@ -572,6 +584,8 @@ class MCPGui(QMainWindow):
         self.dry_run_check.setChecked(True)
         self.attach_images_check = QCheckBox("Enviar imagens ao modelo (multimodal)")
         self.attach_images_check.setChecked(True)
+        self.generate_styles_check = QCheckBox("Gerar estilos")
+        self.generate_styles_check.setChecked(True)
 
         self.only_raw_check.setToolTip(
             "Processa somente arquivos RAW (ignora JPEGs e derivados)."
@@ -582,10 +596,14 @@ class MCPGui(QMainWindow):
         self.attach_images_check.setToolTip(
             "Quando desmarcado, o host enviará apenas metadados e texto ao modelo, sem anexar arquivos de imagem."
         )
+        self.generate_styles_check.setToolTip(
+            "Quando ativado, o sistema gera arquivos de estilo .xmp para Darktable."
+        )
 
         flags_layout.addWidget(self.only_raw_check)
         flags_layout.addWidget(self.dry_run_check)
         flags_layout.addWidget(self.attach_images_check)
+        flags_layout.addWidget(self.generate_styles_check)
         flags_layout.addStretch()
 
         config_form.addRow("Execução:", flags_widget)
@@ -1102,9 +1120,11 @@ class MCPGui(QMainWindow):
             self.target_button,
             self.min_rating_spin,
             self.limit_spin,
+            self.timeout_spin,
             self.only_raw_check,
             self.dry_run_check,
             self.attach_images_check,
+            self.generate_styles_check,
             # self.host_ollama,   -- Removed
             # self.host_lmstudio, -- Removed
             self.model_combo,
