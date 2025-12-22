@@ -683,7 +683,7 @@ def prepare_vision_payloads(
                 )
             
             # Report progress to GUI if callback provided
-            if progress_callback and (idx % 5 == 0 or idx == 1 or idx == total_count):
+            if progress_callback and (idx % 3 == 0 or idx == 1 or idx == total_count):
                 progress_callback(idx, total_count, "Preparando imagens")
                 
         except FileNotFoundError:

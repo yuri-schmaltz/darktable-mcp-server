@@ -269,7 +269,7 @@ class MCPGui(QMainWindow):
 
             QPushButton:disabled {
                 background-color: #2a2a2a;
-                color: #777777;
+                color: #999999;
                 border-color: #333333;
             }
 
@@ -435,6 +435,10 @@ class MCPGui(QMainWindow):
         self.source_combo.setToolTip(
             "Escolhe de onde as imagens serão obtidas: todas, por caminho, por tag ou coleção."
         )
+        self.source_combo.setAccessibleName("Fonte das imagens")
+        self.source_combo.setAccessibleDescription(
+            "Escolher de onde as imagens serão obtidas: todas, por coleção, por caminho ou por tag"
+        )
 
         self.min_rating_spin = QSpinBox()
         self.min_rating_spin.setRange(-2, 5)
@@ -442,12 +446,20 @@ class MCPGui(QMainWindow):
         self.min_rating_spin.setToolTip(
             "Nota mínima das imagens que serão consideradas (de -2 a 5)."
         )
+        self.min_rating_spin.setAccessibleName("Rating mínimo")
+        self.min_rating_spin.setAccessibleDescription(
+            "Nota mínima das imagens a processar, de menos 2 a 5"
+        )
 
         self.limit_spin = QSpinBox()
         self.limit_spin.setRange(1, 100000)
         self.limit_spin.setValue(DEFAULT_LIMIT)
         self.limit_spin.setToolTip(
             "Quantidade máxima de imagens processadas nesta execução."
+        )
+        self.limit_spin.setAccessibleName("Limite de imagens")
+        self.limit_spin.setAccessibleDescription(
+            "Número máximo de imagens a processar nesta execução"
         )
 
         config_form.addRow("Modo:", mode_widget)
@@ -463,17 +475,43 @@ class MCPGui(QMainWindow):
         self.timeout_spin.setToolTip(
             "Tempo máximo de espera pela resposta do modelo LLM (10-600 segundos)."
         )
+        self.timeout_spin.setAccessibleName("Timeout do modelo")
+        self.timeout_spin.setAccessibleDescription(
+            "Tempo máximo de espera pela resposta do modelo LLM em segundos"
+        )
         self._style_form_field(self.timeout_spin)
         config_form.addRow("Timeout do modelo:", self.timeout_spin)
 
         # -------------------------- Filtros e opções ---------------------------
 
         self.path_contains_edit = QLineEdit()
+        self.path_contains_edit.setAccessibleName("Filtro de caminho")
+        self.path_contains_edit.setAccessibleDescription(
+            "Filtrar imagens por trecho do caminho de arquivo"
+        )
+        
         self.tag_edit = QLineEdit()
+        self.tag_edit.setAccessibleName("Tag do Darktable")
+        self.tag_edit.setAccessibleDescription("Tag existente para filtrar imagens")
+        
         self.collection_combo = QComboBox()
         self.collection_combo.setEditable(True)
+        self.collection_combo.setAccessibleName("Coleção do Darktable")
+        self.collection_combo.setAccessibleDescription(
+            "Selecione a coleção (filme) de onde as imagens serão obtidas"
+        )
+        
         self.prompt_edit = QLineEdit()
+        self.prompt_edit.setAccessibleName("Arquivo de prompt personalizado")
+        self.prompt_edit.setAccessibleDescription(
+            "Caminho para arquivo Markdown com instruções customizadas ao modelo"
+        )
+        
         self.target_edit = QLineEdit()
+        self.target_edit.setAccessibleName("Diretório de exportação")
+        self.target_edit.setAccessibleDescription(
+            "Pasta onde os arquivos exportados serão salvos"
+        )
 
         self.prompt_edit.setToolTip(
             "Arquivo Markdown opcional com instruções adicionais para o modelo."
@@ -580,12 +618,31 @@ class MCPGui(QMainWindow):
         flags_layout.setSpacing(16)
 
         self.only_raw_check = QCheckBox("Apenas RAW")
+        self.only_raw_check.setAccessibleName("Apenas arquivos RAW")
+        self.only_raw_check.setAccessibleDescription(
+            "Processar somente arquivos RAW, ignorando JPEG e derivados"
+        )
+        
         self.dry_run_check = QCheckBox("Dry-run")
         self.dry_run_check.setChecked(True)
+        self.dry_run_check.setAccessibleName("Modo dry-run")
+        self.dry_run_check.setAccessibleDescription(
+            "Simular execução sem alterar arquivos ou metadados"
+        )
+        
         self.attach_images_check = QCheckBox("Enviar imagens ao modelo (multimodal)")
         self.attach_images_check.setChecked(True)
+        self.attach_images_check.setAccessibleName("Enviar imagens ao modelo")
+        self.attach_images_check.setAccessibleDescription(
+            "Anexar arquivos de imagem junto aos metadados para modelos multimodais"
+        )
+        
         self.generate_styles_check = QCheckBox("Gerar estilos")
         self.generate_styles_check.setChecked(True)
+        self.generate_styles_check.setAccessibleName("Gerar estilos automaticamente")
+        self.generate_styles_check.setAccessibleDescription(
+            "Gerar arquivos de estilo XMP para Darktable"
+        )
 
         self.only_raw_check.setToolTip(
             "Processa somente arquivos RAW (ignora JPEGs e derivados)."
@@ -613,8 +670,16 @@ class MCPGui(QMainWindow):
 
         self.model_combo = QComboBox()
         self.model_combo.setEditable(True)
+        self.model_combo.setAccessibleName("Modelo LLM")
+        self.model_combo.setAccessibleDescription(
+            "Nome do modelo de linguagem carregado no servidor"
+        )
+        
         self.url_edit = QLineEdit()
         self.url_edit.setToolTip("URL base do servidor LLM escolhido.")
+        self.url_edit.setAccessibleName("URL do servidor LLM")
+        self.url_edit.setAccessibleDescription("Endereço base do servidor Ollama ou LM Studio")
+        
         self.model_combo.setToolTip("Nome do modelo carregado no servidor selecionado.")
         self.check_models_button = QPushButton()
         self.check_models_button.setIcon(
@@ -714,6 +779,10 @@ class MCPGui(QMainWindow):
         self.run_button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.run_button.setMinimumWidth(0)
         self.run_button.setToolTip("Inicia o host com os parâmetros configurados.")
+        self.run_button.setAccessibleName("Executar host")
+        self.run_button.setAccessibleDescription(
+            "Iniciar processamento com os parâmetros configurados"
+        )
         self.run_button.clicked.connect(self.run_host)
 
         self.stop_button = QPushButton()
@@ -723,6 +792,8 @@ class MCPGui(QMainWindow):
         )
         self.stop_button.setIconSize(QSize(18, 18))
         self.stop_button.setToolTip("Encerrar processamento")
+        self.stop_button.setAccessibleName("Parar execução")
+        self.stop_button.setAccessibleDescription("Interromper o processamento em andamento")
         self.stop_button.setEnabled(False)  # Initially disabled
         self.stop_button.clicked.connect(self._stop_processing)
         self.stop_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
