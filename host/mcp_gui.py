@@ -16,7 +16,7 @@ from typing import Callable, Optional
 import requests
 
 from PySide6.QtCore import Qt, Signal, Slot, QSize
-from PySide6.QtGui import QIcon, QPixmap, QResizeEvent
+from PySide6.QtGui import QIcon, QPixmap, QResizeEvent, QShortcut, QKeySequence
 from PySide6.QtWidgets import (
     QApplication,
     QButtonGroup,
@@ -95,6 +95,8 @@ class MCPGui(QMainWindow):
         self._build_layout()
         self._apply_defaults()
         self._connect_dynamic_behaviors()
+        self._setup_keyboard_shortcuts()
+        self._setup_tab_order()
 
     # ----------------------------- UI --------------------------------------------
 
@@ -548,6 +550,16 @@ class MCPGui(QMainWindow):
         )
         self.darktable_probe_button.clicked.connect(self._probe_darktable_connection)
         self._standardize_button(self.darktable_probe_button, width=42)
+        
+        # Refresh collections button
+        self.refresh_collections_button = QPushButton()
+        self.refresh_collections_button.setIcon(
+            self.style().standardIcon(QStyle.StandardPixmap.SP_BrowserReload)
+        )
+        self.refresh_collections_button.setIconSize(QSize(18, 18))
+        self.refresh_collections_button.setToolTip("Atualizar lista de coleções")
+        self.refresh_collections_button.clicked.connect(lambda: self._fetch_and_populate_collections(force_refresh=True))
+        self._standardize_button(self.refresh_collections_button, width=42)
 
         collection_row_widget = QWidget()
         collection_row_layout = QHBoxLayout(collection_row_widget)
@@ -555,6 +567,7 @@ class MCPGui(QMainWindow):
         collection_row_layout.setSpacing(10)
         collection_row_layout.addWidget(self.collection_combo, stretch=1)
         collection_row_layout.addStretch()
+        collection_row_layout.addWidget(self.refresh_collections_button)
         collection_row_layout.addWidget(self.darktable_probe_button)
 
         config_form.addRow("Coleção:", collection_row_widget)
@@ -1053,6 +1066,80 @@ class MCPGui(QMainWindow):
         self.mode_group.buttonToggled.connect(
             lambda: self._update_mode_fields(self._get_selected_mode())
         )
+    
+    def _setup_keyboard_shortcuts(self) -> None:
+        """Configure keyboard shortcuts for common actions."""
+        # Ctrl+R / F5: Run host
+        run_shortcut = QShortcut(QKeySequence("Ctrl+R"), self)
+        run_shortcut.activated.connect(self.run_host)
+        run_f5 = QShortcut(QKeySequence("F5"), self)
+        run_f5.activated.connect(self.run_host)
+        
+        # Ctrl+E / Escape: Stop execution
+        stop_shortcut = QShortcut(QKeySequence("Ctrl+E"), self)
+        stop_shortcut.activated.connect(self._stop_processing)
+        esc_shortcut = QShortcut(QKeySequence("Escape"), self)
+        esc_shortcut.activated.connect(self._stop_processing)
+        
+        # Ctrl+L: Clear log
+        clear_log_shortcut = QShortcut(QKeySequence("Ctrl+L"), self)
+        clear_log_shortcut.activated.connect(self.log_text.clear)
+        
+        # Ctrl+T: Test Darktable connection
+        probe_shortcut = QShortcut(QKeySequence("Ctrl+T"), self)
+        probe_shortcut.activated.connect(self._probe_darktable_connection)
+        
+        # Ctrl+M: Check models
+        models_shortcut = QShortcut(QKeySequence("Ctrl+M"), self)
+        models_shortcut.activated.connect(self._check_connection_and_fetch_models)
+        
+        # Ctrl+O: Open prompt file
+        prompt_shortcut = QShortcut(QKeySequence("Ctrl+O"), self)
+        prompt_shortcut.activated.connect(self._choose_prompt_file)
+        
+        # F1: Show help/shortcuts
+        help_shortcut = QShortcut(QKeySequence("F1"), self)
+        help_shortcut.activated.connect(self._show_keyboard_shortcuts)
+    
+    def _setup_tab_order(self) -> None:
+        """Configure logical tab order for keyboard navigation."""
+        self.setTabOrder(self.source_combo, self.path_contains_edit)
+        self.setTabOrder(self.path_contains_edit, self.tag_edit)
+        self.setTabOrder(self.tag_edit, self.collection_combo)
+        self.setTabOrder(self.collection_combo, self.min_rating_spin)
+        self.setTabOrder(self.min_rating_spin, self.limit_spin)
+        self.setTabOrder(self.limit_spin, self.timeout_spin)
+        self.setTabOrder(self.timeout_spin, self.prompt_edit)
+        self.setTabOrder(self.prompt_edit, self.prompt_button)
+        self.setTabOrder(self.prompt_button, self.target_edit)
+        self.setTabOrder(self.target_edit, self.target_button)
+        self.setTabOrder(self.target_button, self.only_raw_check)
+        self.setTabOrder(self.only_raw_check, self.dry_run_check)
+        self.setTabOrder(self.dry_run_check, self.attach_images_check)
+        self.setTabOrder(self.attach_images_check, self.generate_styles_check)
+        self.setTabOrder(self.generate_styles_check, self.model_combo)
+        self.setTabOrder(self.model_combo, self.url_edit)
+        self.setTabOrder(self.url_edit, self.check_models_button)
+        self.setTabOrder(self.check_models_button, self.prompt_variant_combo)
+        self.setTabOrder(self.prompt_variant_combo, self.run_button)
+        self.setTabOrder(self.run_button, self.stop_button)
+    
+    def _show_keyboard_shortcuts(self) -> None:
+        """Display keyboard shortcuts help dialog."""
+        shortcuts_text = """
+<h3>Atalhos de Teclado</h3>
+<table>
+<tr><td><b>Ctrl+R / F5</b></td><td>Executar host</td></tr>
+<tr><td><b>Ctrl+E / ESC</b></td><td>Parar execução</td></tr>
+<tr><td><b>Ctrl+L</b></td><td>Limpar log</td></tr>
+<tr><td><b>Ctrl+T</b></td><td>Testar conexão Darktable</td></tr>
+<tr><td><b>Ctrl+M</b></td><td>Verificar modelos disponíveis</td></tr>
+<tr><td><b>Ctrl+O</b></td><td>Abrir arquivo de prompt</td></tr>
+<tr><td><b>F1</b></td><td>Mostrar este help</td></tr>
+<tr><td><b>Tab</b></td><td>Navegar entre campos</td></tr>
+</table>
+"""
+        QMessageBox.information(self, "Atalhos de Teclado", shortcuts_text)
 
     def _apply_host_defaults(self) -> None:
         host = "ollama"
@@ -1477,9 +1564,21 @@ class MCPGui(QMainWindow):
         if source == "collection":
             self._fetch_and_populate_collections()
 
-    def _fetch_and_populate_collections(self) -> None:
-        """Fetch collections from Darktable in a background thread."""
+    def _fetch_and_populate_collections(self, force_refresh: bool = False) -> None:
+        """Fetch collections from Darktable in a background thread, with caching."""
+        import time
+        
+        # Check cache if not forcing refresh
+        if not force_refresh and self._collections_cache is not None:
+            cached_time, cached_collections = self._collections_cache
+            age = time.time() - cached_time
+            if age < self._collections_cache_ttl:
+                self._append_log(f"[cache] Usando coleções em cache ({age:.1f}s de idade)")
+                self.collections_signal.emit(cached_collections)
+                return
+        
         def task() -> None:
+            import time
             from common import list_available_collections, McpClient, _find_appimage, DT_SERVER_CMD
             
             self._append_log("[dt] Buscando coleções do Darktable...")
@@ -1491,6 +1590,9 @@ class MCPGui(QMainWindow):
                     
                 collections = [c.get("path", "") for c in collections_data if c.get("path")]
                 self._append_log(f"[dt] {len(collections)} coleção(ões) encontrada(s).")
+                
+                # Update cache
+                self._collections_cache = (time.time(), collections)
                 
                 self.status_signal.emit(f"{len(collections)} coleção(ões) disponível(is).")
                 self.collections_signal.emit(collections)
