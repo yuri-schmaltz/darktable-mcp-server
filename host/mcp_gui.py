@@ -58,6 +58,93 @@ GUI_CLIENT_INFO = {"name": "darktable-mcp-gui", "version": HOST_APP_VERSION}
 
 
 class MCPGui(QMainWindow):
+            def _enhance_accessibility(self):
+                # Foco inicial no primeiro campo relevante
+                self.source_combo.setFocus()
+                # Tooltips reforçados para todos os campos principais
+                for widget, tip in [
+                    (self.mode_rating, "Atribuir notas às imagens (atalho: Alt+1)"),
+                    (self.mode_tagging, "Sugerir e aplicar tags (atalho: Alt+2)"),
+                    (self.mode_export, "Exportar imagens selecionadas (atalho: Alt+3)"),
+                    (self.mode_treatment, "Aplicar tratamento de imagem (atalho: Alt+4)"),
+                    (self.mode_completo, "Fluxo completo: Rating -> Tagging -> Tratamento -> Export (atalho: Alt+5)"),
+                    (self.source_combo, "Escolhe de onde as imagens serão obtidas (atalho: Alt+S)"),
+                    (self.min_rating_spin, "Nota mínima das imagens (atalho: Alt+R)"),
+                    (self.limit_spin, "Limite de imagens a processar (atalho: Alt+L)"),
+                    (self.timeout_spin, "Timeout do modelo LLM (atalho: Alt+T)"),
+                    (self.path_contains_edit, "Filtrar imagens por caminho (atalho: Alt+C)"),
+                    (self.tag_edit, "Filtrar imagens por tag (atalho: Alt+G)"),
+                    (self.collection_combo, "Selecionar coleção do Darktable (atalho: Alt+O)"),
+                    (self.prompt_edit, "Arquivo de prompt customizado (atalho: Alt+P)"),
+                    (self.target_edit, "Diretório de exportação (atalho: Alt+D)"),
+                    (self.model_combo, "Modelo LLM (atalho: Alt+M)"),
+                    (self.url_edit, "URL do servidor LLM (atalho: Alt+U)"),
+                ]:
+                    widget.setToolTip(tip)
+                # ARIA/nomeação para leitores de tela
+                for widget, name in [
+                    (self.mode_rating, "Modo rating"),
+                    (self.mode_tagging, "Modo tagging"),
+                    (self.mode_export, "Modo export"),
+                    (self.mode_treatment, "Modo tratamento"),
+                    (self.mode_completo, "Modo completo"),
+                    (self.source_combo, "Fonte das imagens"),
+                    (self.min_rating_spin, "Rating mínimo"),
+                    (self.limit_spin, "Limite de imagens"),
+                    (self.timeout_spin, "Timeout do modelo"),
+                    (self.path_contains_edit, "Filtro de caminho"),
+                    (self.tag_edit, "Tag do Darktable"),
+                    (self.collection_combo, "Coleção do Darktable"),
+                    (self.prompt_edit, "Arquivo de prompt personalizado"),
+                    (self.target_edit, "Diretório de exportação"),
+                    (self.model_combo, "Modelo LLM"),
+                    (self.url_edit, "URL do servidor LLM"),
+                ]:
+                    widget.setAccessibleName(name)
+                # Feedback visual para foco
+                for widget in [
+                    self.source_combo, self.min_rating_spin, self.limit_spin, self.timeout_spin,
+                    self.path_contains_edit, self.tag_edit, self.collection_combo, self.prompt_edit,
+                    self.target_edit, self.model_combo, self.url_edit
+                ]:
+                    widget.setStyleSheet(widget.styleSheet() + "\n:focus { border: 2px solid #77a0ff; }")
+                # Atalhos de teclado para modos e campos principais
+                from PySide6.QtGui import QShortcut, QKeySequence
+                for key, widget in [
+                    ("Alt+1", self.mode_rating),
+                    ("Alt+2", self.mode_tagging),
+                    ("Alt+3", self.mode_export),
+                    ("Alt+4", self.mode_treatment),
+                    ("Alt+5", self.mode_completo),
+                    ("Alt+S", self.source_combo),
+                    ("Alt+R", self.min_rating_spin),
+                    ("Alt+L", self.limit_spin),
+                    ("Alt+T", self.timeout_spin),
+                    ("Alt+C", self.path_contains_edit),
+                    ("Alt+G", self.tag_edit),
+                    ("Alt+O", self.collection_combo),
+                    ("Alt+P", self.prompt_edit),
+                    ("Alt+D", self.target_edit),
+                    ("Alt+M", self.model_combo),
+                    ("Alt+U", self.url_edit),
+                ]:
+                    shortcut = QShortcut(QKeySequence(key), self)
+                    shortcut.activated.connect(lambda w=widget: w.setFocus())
+
+        # ----------------------------- MÉTRICAS --------------------------------------------
+        def _init_metrics(self):
+            self._metrics = {
+                "exec_count": 0,
+                "exec_errors": 0,
+                "last_exec_duration": 0.0,
+                "last_exec_start": None,
+                "last_exec_end": None,
+                "llm_model_checks": 0,
+                "dt_collection_checks": 0,
+            }
+            import logging
+            self._metrics_logger = logging.getLogger("mcp_gui.metrics")
+
     log_signal = Signal(str)
     status_signal = Signal(str)
     progress_signal = Signal(bool)
@@ -70,7 +157,12 @@ class MCPGui(QMainWindow):
         self,
         mcp_client_factory=None,
         llm_provider_factory=None,
-    ) -> None:
+    ):
+        """
+        Parâmetros opcionais para facilitar testes automatizados:
+        - mcp_client_factory: função/fábrica que retorna um IMcpClient (mockável)
+        - llm_provider_factory: função/fábrica que retorna um ILLMProvider (mockável)
+        """
         super().__init__()
 
         self.setWindowTitle("Darktable MCP")
@@ -107,6 +199,7 @@ class MCPGui(QMainWindow):
         self.collections_signal.connect(self._populate_collections)
         self.progress_update_signal.connect(self._update_progress)
 
+        self._init_metrics()
         self._apply_global_style()
         self._build_menu_bar()
         self._build_layout()
@@ -114,6 +207,7 @@ class MCPGui(QMainWindow):
         self._connect_dynamic_behaviors()
         self._setup_keyboard_shortcuts()
         self._setup_tab_order()
+        self._enhance_accessibility()
 
     # ----------------------------- UI --------------------------------------------
 
@@ -1213,6 +1307,7 @@ class MCPGui(QMainWindow):
     # ----------------------------- Tarefas Assíncronas -------------------------------------
 
     def _run_async(self, description: str, target: Callable[[], None]) -> None:
+        import time
         if self._current_thread and self._current_thread.is_alive():
             QMessageBox.warning(
                 self,
@@ -1223,15 +1318,46 @@ class MCPGui(QMainWindow):
 
         self.status_signal.emit(description)
         self.progress_signal.emit(True)
-        
+
         # Reset stop flag and enable stop button
         self._stop_requested = False
         self.stop_button.setEnabled(True)
         self.run_button.setEnabled(False)
 
+        # Métricas: início da execução
+        self._metrics["exec_count"] += 1
+        self._metrics["last_exec_start"] = time.time()
+        self._metrics_logger.info({
+            "event": "exec_start",
+            "desc": description,
+            "count": self._metrics["exec_count"],
+            "ts": self._metrics["last_exec_start"],
+        })
+
+        def wrapped():
+            try:
+                target()
+                self._metrics["last_exec_end"] = time.time()
+                self._metrics["last_exec_duration"] = self._metrics["last_exec_end"] - self._metrics["last_exec_start"]
+                self._metrics_logger.info({
+                    "event": "exec_success",
+                    "desc": description,
+                    "duration": self._metrics["last_exec_duration"],
+                    "ts": self._metrics["last_exec_end"],
+                })
+            except Exception as exc:
+                self._metrics["exec_errors"] += 1
+                self._metrics_logger.error({
+                    "event": "exec_error",
+                    "desc": description,
+                    "error": str(exc),
+                    "ts": time.time(),
+                })
+                raise
+
         self._current_thread = threading.Thread(
             target=self._wrap_task,
-            args=(target,),
+            args=(wrapped,),
             daemon=True,
         )
         self._current_thread.start()
@@ -1541,6 +1667,13 @@ class MCPGui(QMainWindow):
 
     def _fetch_available_models(self, host: str, url: str) -> list[str]:
         """Consulta modelos disponíveis usando a interface ILLMProvider."""
+        # Métricas: contagem de checagem de modelos LLM
+        self._metrics["llm_model_checks"] += 1
+        self._metrics_logger.info({
+            "event": "llm_model_check",
+            "url": url,
+            "count": self._metrics["llm_model_checks"],
+        })
         if not self._llm_provider_factory:
             raise RuntimeError("Fábrica de LLMProvider não configurada na GUI.")
         provider = self._llm_provider_factory(url=url, model="", timeout=10)
@@ -1590,6 +1723,11 @@ class MCPGui(QMainWindow):
             import time
             from common import list_available_collections, _find_appimage
 
+            self._metrics["dt_collection_checks"] += 1
+            self._metrics_logger.info({
+                "event": "dt_collection_check",
+                "count": self._metrics["dt_collection_checks"],
+            })
             self._append_log("[dt] Buscando coleções do Darktable...")
 
             def task():
