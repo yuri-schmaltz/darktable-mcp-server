@@ -6,6 +6,8 @@ para executar os hosts mostrando o progresso das atividades.
 """
 from __future__ import annotations
 
+from host.i18n import i18n
+
 import re
 import subprocess
 import sys
@@ -271,10 +273,10 @@ class MCPGui(QMainWindow):
         
         clear_logs_action = QAction("Limpar &Logs", self)
         clear_logs_action.triggered.connect(lambda: self.log_text.clear())
-        tools_menu.addAction(clear_logs_action)
-        
-        # Menu Ajuda  
-        help_menu = menubar.addMenu("Aj&uda")
+        self.prompt_label = QLabel(i18n.t("label.prompt"))
+        self.target_label = QLabel(i18n.t("label.target_dir"))
+        self.model_label = QLabel(i18n.t("label.model"))
+        self.collection_label = QLabel(i18n.t("label.collection"))
         
         docs_action = QAction("&Documentação", self)
         docs_action.setEnabled(False)  # Placeholder
@@ -287,68 +289,97 @@ class MCPGui(QMainWindow):
 
     def _apply_global_style(self) -> None:
         """Tema dark consistente e componentes padronizados."""
+        # Design tokens (cores, tipografia, espaçamento, borda)
         self.setStyleSheet(
             """
-            /* BASE ----------------------------------------------------- */
+            :root {
+                --color-primary: #2563eb;
+                --color-error: #dc2626;
+                --color-bg: #f8fafc;
+                --color-text: #1e293b;
+                --color-bg-dark: #262626;
+                --color-bg-group: #303030;
+                --color-border: #444444;
+                --color-border-light: #555555;
+                --color-border-focus: #77a0ff;
+                --color-disabled: #2a2a2a;
+                --color-disabled-text: #999999;
+                --color-success: #2da86f;
+                --color-progress: #77a0ff;
+                --color-button: #3b3b3b;
+                --color-button-hover: #4a4a4a;
+                --color-button-pressed: #333333;
+                --color-stop: #cc3333;
+                --color-stop-hover: #dd4444;
+                --color-stop-pressed: #bb2222;
+                --color-stop-border: #ff4444;
+                --color-image-bg: #3b2a1c;
+                --color-image-border: #2da86f;
+                --color-image-text: #d9d9d9;
+                --color-label: #f2f2f2;
+                --color-label-light: #c9c9c9;
+                --color-progress-text: #e8e8e8;
+                --font-main: 'Inter', Arial, sans-serif;
+                --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+                --font-size: 14px;
+                --font-size-title: 18px;
+                --radius: 4px;
+                --radius-group: 8px;
+                --spacing: 16px;
+                --spacing-sm: 8px;
+                --spacing-lg: 24px;
+            }
+
             QWidget {
-                font-size: 13px;
-                color: #f2f2f2;
+                font-size: var(--font-size);
+                font-family: var(--font-main);
+                color: var(--color-label);
             }
-
             QMainWindow {
-                background-color: #262626;
+                background-color: var(--color-bg-dark);
             }
-
             QLabel {
-                color: #f2f2f2;
+                color: var(--color-label);
                 background-color: transparent;
             }
-
             QToolTip {
                 background-color: #3a3a3a;
-                color: #f2f2f2;
-                border: 1px solid #555555;
+                color: var(--color-label);
+                border: 1px solid var(--color-border-light);
                 padding: 4px 6px;
             }
-
-            /* GROUPBOXES ---------------------------------------------- */
             QGroupBox {
                 font-weight: 600;
-                margin-top: 16px;
-                border: 1px solid #444444;
-                border-radius: 8px;
+                margin-top: var(--spacing);
+                border: 1px solid var(--color-border);
+                border-radius: var(--radius-group);
                 padding: 10px 10px 12px 10px;
-                background-color: #303030;
+                background-color: var(--color-bg-group);
             }
-
             QGroupBox::title {
                 subcontrol-origin: margin;
                 left: 12px;
                 padding: 0 6px;
                 background-color: transparent;
             }
-
-            /* CAMPOS DE TEXTO / INPUTS -------------------------------- */
             QLineEdit,
             QComboBox,
             QSpinBox,
             QTextEdit {
                 padding: 4.5px 6px;
                 min-height: 30px;
-                border: 1px solid #555555;
-                border-radius: 4px;
+                border: 1px solid var(--color-border-light);
+                border-radius: var(--radius);
                 background-color: #363636;
-                selection-background-color: #77a0ff;
+                selection-background-color: var(--color-progress);
                 selection-color: #ffffff;
             }
-
             QLineEdit:focus,
             QComboBox:focus,
             QSpinBox:focus,
             QTextEdit:focus {
-                border-color: #77a0ff;
+                border-color: var(--color-border-focus);
             }
-
             QLineEdit:disabled,
             QComboBox:disabled,
             QSpinBox:disabled {
@@ -356,114 +387,90 @@ class MCPGui(QMainWindow):
                 color: #888888;
                 border-color: #3a3a3a;
             }
-
             QTextEdit {
                 min-height: 150px;
-                font-family: "JetBrains Mono", "Fira Code", monospace;
+                font-family: var(--font-mono);
             }
-
-            /* BOTÕES --------------------------------------------------- */
             QPushButton {
                 padding: 6px 14px;
                 min-height: 30px;
-                background-color: #3b3b3b;
-                border: 1px solid #555555;
+                background-color: var(--color-button);
+                border: 1px solid var(--color-border-light);
                 border-radius: 6px;
                 color: #f0f0f0;
             }
-
             QPushButton:hover {
-                background-color: #4a4a4a;
+                background-color: var(--color-button-hover);
             }
-
             QPushButton:pressed {
-                background-color: #333333;
+                background-color: var(--color-button-pressed);
             }
-
             QPushButton:disabled {
-                background-color: #2a2a2a;
-                color: #999999;
+                background-color: var(--color-disabled);
+                color: var(--color-disabled-text);
                 border-color: #333333;
             }
-
-            /* BOTÃO PRINCIPAL ----------------------------------------- */
             QPushButton#primaryButton {
-                background-color: #336dff;
+                background-color: var(--color-primary);
                 border-color: #4e82ff;
                 font-weight: 600;
             }
-
             QPushButton#primaryButton:hover {
                 background-color: #3f7dff;
             }
-
             QPushButton#primaryButton:pressed {
                 background-color: #295fdb;
             }
-
             QPushButton#primaryButton:disabled {
-                background-color: #2a2a2a;
+                background-color: var(--color-disabled);
                 border-color: #333333;
                 color: #777777;
                 font-weight: 500;
             }
-
-            /* BOTÃO DE PARAR ------------------------------------------ */
             QPushButton#stopButton {
-                background-color: #cc3333;
-                border-color: #ff4444;
+                background-color: var(--color-stop);
+                border-color: var(--color-stop-border);
                 font-weight: 600;
                 min-width: 50px;
             }
-
             QPushButton#stopButton:hover {
-                background-color: #dd4444;
+                background-color: var(--color-stop-hover);
             }
-
             QPushButton#stopButton:pressed {
-                background-color: #bb2222;
+                background-color: var(--color-stop-pressed);
             }
-
             QPushButton#stopButton:disabled {
-                background-color: #2a2a2a;
+                background-color: var(--color-disabled);
                 border-color: #333333;
                 color: #777777;
             }
-
-            /* CHECKBOX / RADIO ---------------------------------------- */
             QCheckBox,
             QRadioButton {
                 spacing: 24px;
                 min-height: 25px;
             }
-
-            /* STATUSBAR / PROGRESS ------------------------------------ */
             QStatusBar {
-                background-color: #262626;
+                background-color: var(--color-bg-dark);
                 border-top: 1px solid #3a3a3a;
             }
-
             QProgressBar {
-                border: 1px solid #555555;
-                border-radius: 4px;
+                border: 1px solid var(--color-border-light);
+                border-radius: var(--radius);
                 background-color: #333333;
-                color: #e8e8e8;
+                color: var(--color-progress-text);
                 font-weight: 600;
                 text-align: center;
                 min-height: 30px;
             }
-
             QProgressBar::chunk {
                 border-radius: 3px;
-                background-color: #77a0ff;
+                background-color: var(--color-progress);
             }
-
-            /* PREVIEW DE IMAGEM ------------------------------------ */
             QLabel#imagePreview {
-                background-color: #3b2a1c;
-                border: 2px solid #2da86f;
+                background-color: var(--color-image-bg);
+                border: 2px solid var(--color-image-border);
                 border-radius: 10px;
-                color: #d9d9d9;
+                color: var(--color-image-text);
                 padding: 10px;
             }
             """
@@ -895,29 +902,27 @@ class MCPGui(QMainWindow):
         right_column.addWidget(log_group, stretch=2)
 
         # ----------------------------- Botão principal --------------------------
-        self.run_button = QPushButton("Executar host")
+        self.run_button = QPushButton(i18n.t("button.run"))
         self.run_button.setObjectName("primaryButton")
         self.run_button.setIcon(
             self.style().standardIcon(QStyle.StandardPixmap.SP_MediaPlay)
         )
         self.run_button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.run_button.setMinimumWidth(0)
-        self.run_button.setToolTip("Inicia o host com os parâmetros configurados.")
-        self.run_button.setAccessibleName("Executar host")
-        self.run_button.setAccessibleDescription(
-            "Iniciar processamento com os parâmetros configurados"
-        )
+        self.run_button.setToolTip(i18n.t("button.run"))
+        self.run_button.setAccessibleName(i18n.t("button.run"))
+        self.run_button.setAccessibleDescription(i18n.t("button.run"))
         self.run_button.clicked.connect(self.run_host)
 
-        self.stop_button = QPushButton()
+        self.stop_button = QPushButton(i18n.t("button.stop"))
         self.stop_button.setObjectName("stopButton")
         self.stop_button.setIcon(
             self.style().standardIcon(QStyle.StandardPixmap.SP_BrowserStop)
         )
         self.stop_button.setIconSize(QSize(18, 18))
-        self.stop_button.setToolTip("Encerrar processamento")
-        self.stop_button.setAccessibleName("Parar execução")
-        self.stop_button.setAccessibleDescription("Interromper o processamento em andamento")
+        self.stop_button.setToolTip(i18n.t("button.stop"))
+        self.stop_button.setAccessibleName(i18n.t("button.stop"))
+        self.stop_button.setAccessibleDescription(i18n.t("button.stop"))
         self.stop_button.setEnabled(False)  # Initially disabled
         self.stop_button.clicked.connect(self._stop_processing)
         self.stop_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
@@ -941,7 +946,7 @@ class MCPGui(QMainWindow):
         self._build_status_bar()
 
     def _build_current_image_group(self) -> QGroupBox:
-        group = QGroupBox("Imagem em tratamento")
+        group = QGroupBox(i18n.t("label.progress"))
         group.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         layout = QVBoxLayout(group)
@@ -986,7 +991,7 @@ class MCPGui(QMainWindow):
         self.progress.setValue(0)
         self.progress.setTextVisible(True)
         self.progress.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.progress.setFormat("Pronto para configurar a execução.")
+        self.progress.setFormat(i18n.t("msg.ready"))
         self.progress.setFixedHeight(30)
         self.progress.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
 
@@ -1442,7 +1447,7 @@ class MCPGui(QMainWindow):
         if not running:
             # Reset to 0% when stopping
             self.progress.setValue(0)
-            self.progress.setFormat("Pronto.")
+            self.progress.setFormat(i18n.t("msg.ready"))
 
     @Slot(int, int, str)
     def _update_progress(self, current: int, total: int, message: str) -> None:
@@ -1471,28 +1476,37 @@ class MCPGui(QMainWindow):
         try:
             config = self._build_config()
         except ValueError as exc:
-            QMessageBox.critical(self, "Parâmetros inválidos", str(exc))
+            self.error_signal.emit(f"Parâmetros inválidos: {exc}")
+            return
+        except (PromptValidationError, LLMProviderError) as exc:
+            self.error_signal.emit(str(exc))
             return
 
         self._reset_image_preview("Aguardando detecção da imagem em processamento...")
 
         def task() -> None:
-            cmd = config.build_command()
-            self._append_log("Executando: " + " ".join(cmd))
+            try:
+                cmd = config.build_command()
+                self._append_log("Executando: " + " ".join(cmd))
 
-            proc = subprocess.Popen(
-                cmd,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                text=True,
-            )
-            assert proc.stdout is not None
+                proc = subprocess.Popen(
+                    cmd,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    text=True,
+                )
+                assert proc.stdout is not None
 
-            for line in proc.stdout:
-                self._append_log(line.rstrip())
+                for line in proc.stdout:
+                    self._append_log(line.rstrip())
 
-            ret = proc.wait()
-            if ret == 0:
+                ret = proc.wait()
+                if ret != 0:
+                    raise RuntimeError(f"Processo retornou código de erro {ret}")
+            except (PromptValidationError, LLMProviderError) as exc:
+                self.error_signal.emit(str(exc))
+            except Exception as exc:
+                self.error_signal.emit(f"Erro inesperado: {exc}")
                 self._append_log("Execução concluída com sucesso.")
             else:
                 self._append_log(f"Execução finalizada com código {ret}.")

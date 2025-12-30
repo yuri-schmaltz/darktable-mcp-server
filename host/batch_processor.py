@@ -1,3 +1,7 @@
+class PromptValidationError(Exception):
+    """Erro de domínio para falhas de validação de prompt."""
+    pass
+
 from __future__ import annotations
 
 import json
@@ -125,9 +129,13 @@ class BatchProcessor:
         try:
             system_prompt = get_prompt(mode, args.prompt_variant)
         except Exception as e:
-            logging.error(f"Erro ao carregar prompt: {e}")
-            print(f"[erro] Falha ao carregar prompt: {e}")
-            return None, None
+            logging.error({
+                "event": "prompt_load_error",
+                "mode": mode,
+                "variant": args.prompt_variant,
+                "error": str(e),
+            })
+            raise PromptValidationError(f"Falha ao carregar prompt: {e}") from e
         # progress_callback não definido, definir como None por padrão
         vision_images, vision_errors = prepare_vision_payloads_async(
             sample,
@@ -137,9 +145,13 @@ class BatchProcessor:
         )
         
         if not vision_images and images and not args.text_only:
-            logging.error("[erro] Nenhuma imagem encontrada no disco. Verifique se o drive está montado ou se o banco de dados do Darktable está atualizado.")
-            print("[erro] Nenhuma imagem encontrada no disco. Verifique se o drive está montado ou se o banco de dados do Darktable está atualizado.")
-            return None, None
+            msg = "Nenhuma imagem encontrada no disco. Verifique se o drive está montado ou se o banco de dados do Darktable está atualizado."
+            logging.error({
+                "event": "vision_image_not_found",
+                "mode": mode,
+                "error": msg,
+            })
+            raise RuntimeError(msg)
 
         if vision_errors:
             logging.warning(f"[{mode}] Erros de imagem: {vision_errors}")
@@ -182,12 +194,13 @@ class BatchProcessor:
             edits = parsed.get("edits", [])
         except Exception as e:
             error_msg = str(e)
-            logging.error(f"[rating] Erro JSON: {e}")
-            logging.error(f"[rating] Resposta bruta do LLM:\n{answer}")
-            print(f"[rating] Erro JSON: {e}")
-            print(f"[rating] Resposta bruta do LLM:\n{answer}")
+            logging.error({
+                "event": "rating_json_error",
+                "error": error_msg,
+                "raw_answer": answer,
+            })
             self._log_metric("rating", success=False, duration=time.time()-t0, extra={"error": error_msg})
-            return
+            raise RuntimeError(f"Erro ao processar resposta do LLM: {error_msg}") from e
         if not edits:
             logging.info("[rating] Nenhuma edição.")
             print("[rating] Nenhuma edição.")
@@ -210,18 +223,19 @@ class BatchProcessor:
         try:
             if self.dry_run:
                 logging.info("[rating] DRY-RUN. Nenhuma ação tomada.")
-                print("[rating] DRY-RUN. Nenhuma ação tomada.")
             else:
                 res = self.client.call_tool("apply_batch_edits", {"edits": edits})
                 result_text = res["content"][0]["text"]
                 logging.info(f"[rating] {result_text}")
-                print(f"[rating] {result_text}")
             success = True
         except Exception as e:
             error_msg = str(e)
-            logging.error(f"[rating] Erro ao aplicar edits: {e}")
-            print(f"[rating] Erro ao aplicar edits: {e}")
-        self._log_metric("rating", success=success, duration=time.time()-t0, extra={"edits": len(edits), "error": error_msg} if error_msg else {"edits": len(edits)})
+            logging.error({
+                "event": "rating_apply_edits_error",
+                "error": error_msg,
+            })
+            self._log_metric("rating", success=False, duration=time.time()-t0, extra={"edits": len(edits), "error": error_msg})
+            raise RuntimeError(f"Erro ao aplicar edits: {error_msg}") from e
 
     def _log_metric(self, mode, success, duration, extra=None):
         """Loga métrica simples em logs/metrics.json."""

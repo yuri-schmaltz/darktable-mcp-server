@@ -1,3 +1,7 @@
+class LLMProviderError(Exception):
+    """Erro de domínio para falhas em providers LLM."""
+    pass
+
 class ILLMProvider(ABC):
     """
     Interface para providers LLM (Ollama, OpenAI, etc).
@@ -60,7 +64,9 @@ class OllamaProvider(LLMProviderBase):
         started = time.time()
         logging.info(f"[Ollama] Aguardando resposta do modelo {self.model}...")
         try:
-            resp, elapsed_ms = post_json_with_retries(chat_url, payload, timeout=self.timeout, retries=2, retry_delay=2.0, description="Ollama chat")
+            resp, elapsed_ms = post_json_with_retries(
+                chat_url, payload, timeout=self.timeout, retries=2, retry_delay=2.0, description="Ollama chat"
+            )
             resp.raise_for_status()
             data = resp.json()
             content = data["message"]["content"]
@@ -76,8 +82,14 @@ class OllamaProvider(LLMProviderBase):
             logging.info(f"[Ollama] Status: {resp.status_code}, Time: {elapsed_ms}ms")
             return content, meta
         except Exception as e:
-            logging.error(f"[Ollama] Erro na chamada ao modelo: {e}")
-            raise
+            logging.error({
+                "event": "llm_error",
+                "provider": "ollama",
+                "model": self.model,
+                "url": self.url,
+                "error": str(e),
+            })
+            raise LLMProviderError(f"[Ollama] Erro na chamada ao modelo: {e}") from e
 
     def check_vision_support(self, text_only: bool = False) -> None:
         if text_only:
@@ -88,23 +100,38 @@ class OllamaProvider(LLMProviderBase):
 
     def download_model(self, model: str) -> Iterator[str]:
         pull_url = f"{self.url}/api/pull"
-        resp = requests.post(pull_url, json={"model": model}, stream=True, timeout=10)
-        resp.raise_for_status()
-        
-        for line in resp.iter_lines():
-            if not line: continue
-            try:
-                data = json.loads(line.decode("utf-8"))
-                status = data.get("status") or data.get("message")
-                if status:
-                    yield status
-            except Exception:
-                pass
+        try:
+            resp = requests.post(pull_url, json={"model": model}, stream=True, timeout=10)
+            resp.raise_for_status()
+            for line in resp.iter_lines():
+                if not line:
+                    continue
+                try:
+                    data = json.loads(line.decode("utf-8"))
+                    status = data.get("status") or data.get("message")
+                    if status:
+                        yield status
+                except Exception as e:
+                    logging.warning({
+                        "event": "llm_download_model_parse_error",
+                        "provider": "ollama",
+                        "model": model,
+                        "error": str(e),
+                    })
+        except Exception as e:
+            logging.error({
+                "event": "llm_download_model_error",
+                "provider": "ollama",
+                "model": model,
+                "url": self.url,
+                "error": str(e),
+            })
+            raise LLMProviderError(f"[Ollama] Erro ao baixar modelo: {e}") from e
 
 
 class OpenAICompatProvider(LLMProviderBase):
     def chat(self, messages: list[dict]) -> tuple[str, dict]:
-        # Ajuste de URL para comtatibilidade com /v1/chat/completions
+        # Ajuste de URL para compatibilidade com /v1/chat/completions
         endpoint = self.url
         if not endpoint.endswith("/chat/completions"):
             endpoint = f"{endpoint}/v1/chat/completions"
@@ -115,7 +142,9 @@ class OpenAICompatProvider(LLMProviderBase):
         }
         started = time.time()
         try:
-            resp, elapsed_ms = post_json_with_retries(endpoint, payload, timeout=self.timeout, retries=2, retry_delay=2.0, description="OpenAICompat chat")
+            resp, elapsed_ms = post_json_with_retries(
+                endpoint, payload, timeout=self.timeout, retries=2, retry_delay=2.0, description="OpenAICompat chat"
+            )
             resp.raise_for_status()
             data = resp.json()
             content = data["choices"][0]["message"]["content"]
@@ -130,8 +159,14 @@ class OpenAICompatProvider(LLMProviderBase):
             logging.info(f"[OpenAICompat] Status: {resp.status_code}, Time: {elapsed_ms}ms")
             return content, meta
         except Exception as e:
-            logging.error(f"[OpenAICompat] Erro na chamada ao modelo: {e}")
-            raise
+            logging.error({
+                "event": "llm_error",
+                "provider": "openai-compat",
+                "model": self.model,
+                "url": self.url,
+                "error": str(e),
+            })
+            raise LLMProviderError(f"[OpenAICompat] Erro na chamada ao modelo: {e}") from e
 
     def check_vision_support(self, text_only: bool = False) -> None:
         pass

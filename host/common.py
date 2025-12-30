@@ -129,6 +129,9 @@ class McpClient:
     ):
         self.command = command
         # Se command for AppImage, ajustamos env automaticamente
+    class PromptValidationError(Exception):
+        """Erro de domínio para falhas de validação de prompt."""
+        pass
         self._appimage_proc: Optional[subprocess.Popen] = None
         self._appimage_mount: Optional[str] = None
         self._setup_appimage_env(env, appimage_path)
@@ -434,45 +437,50 @@ def post_json_with_retries(
     last_timeout_msg: str | None = None
 
     for attempt in range(1, attempts + 1):
+        started = time.time()
         try:
-            started = time.time()
             resp = requests.post(url, json=payload, timeout=timeout)
             elapsed_ms = int((time.time() - started) * 1000)
             if attempt > 1:
-                print(f"[http] {desc} concluído após retry ({elapsed_ms} ms).")
+                logging.info({
+                    "event": "http_retry_success",
+                    "desc": desc,
+                    "attempt": attempt,
+                    "elapsed_ms": elapsed_ms,
+                })
             return resp, elapsed_ms
         except requests.Timeout as exc:
             last_timeout_msg = (
                 f"{desc} excedeu o tempo limite de {timeout}s (tentativa {attempt}/{attempts}). "
                 "Ajuste --timeout ou OLLAMA_TIMEOUT se precisar de mais tempo."
             )
-            print(f"[http] {last_timeout_msg}")
+            logging.warning({
+                "event": "http_timeout",
+                "desc": desc,
+                "attempt": attempt,
+                "timeout": timeout,
+                "error": str(exc),
+            })
             last_error = exc
         except requests.RequestException as exc:
             last_error = exc
-            print(
-                f"[http] Erro ao {desc}: {exc} (tentativa {attempt}/{attempts})."
-            )
+            logging.error({
+                "event": "http_request_exception",
+                "desc": desc,
+                "attempt": attempt,
+                "error": str(exc),
+            })
 
         if attempt < attempts:
             time.sleep(retry_delay)
 
     if last_timeout_msg:
-        raise SystemExit(last_timeout_msg)
+        raise RuntimeError(last_timeout_msg)
 
     if last_error:
-        raise SystemExit(f"Falha ao {desc}: {last_error}")
+        raise RuntimeError(f"Falha ao {desc}: {last_error}")
 
-    raise SystemExit(f"Falha desconhecida ao {desc}")
-
-
-def _flatpak_darktable_prefixes() -> list[Path]:
-    home = Path.home()
-    return [
-        home / ".local/share/flatpak/app/org.darktable.Darktable/current/active/files",
-        Path("/var/lib/flatpak/app/org.darktable.Darktable/current/active/files"),
-    ]
-
+    raise RuntimeError(f"Falha desconhecida ao {desc}")
 
 def _flatpak_darktable_available() -> bool:
     if shutil.which("flatpak") is None:
@@ -642,7 +650,13 @@ def load_prompt(
         path = PROMPT_DIR / fname
 
     if not path.exists():
-        raise FileNotFoundError(f"Prompt não encontrado: {path}")
+            logging.error({
+                "event": "prompt_file_not_found",
+                "mode": mode,
+                "variant": variant,
+                "path": str(path),
+            })
+            raise PromptValidationError(f"Prompt não encontrado: {path}")
     return path.read_text(encoding="utf-8")
 
 
@@ -724,15 +738,13 @@ def prepare_vision_payloads(
             b64_size_kb = len(b64) / 1024
             total_b64_size += len(b64)
             
-            # Log every 10 images or if it's a large set, log less frequently
-            log_interval = 50 if total_count > 200 else 10
-            if idx % log_interval == 0 or idx == 1 or idx == total_count:
+            # Log sempre na primeira, última e a cada 3 imagens
+            if idx % 3 == 0 or idx == 1 or idx == total_count:
                 logging.info(
                     f"Processando imagem {idx}/{total_count}: {image_path.name} "
                     f"({original_size_mb:.1f} MB → {b64_size_kb:.0f} KB base64)"
                 )
-            
-            # Report progress to GUI if callback provided
+            # Callback sempre na primeira, última e a cada 3 imagens
             if progress_callback and (idx % 3 == 0 or idx == 1 or idx == total_count):
                 progress_callback(idx, total_count, "Preparando imagens")
                 
@@ -821,14 +833,13 @@ def prepare_vision_payloads_async(
                 current = completed_count[0]
             
             # Log every 10 images or if it's a large set, log less frequently
-            log_interval = 50 if total_count > 200 else 10
-            if idx % log_interval == 0 or idx == 1 or idx == total_count:
+            # Log sempre na primeira, última e a cada 3 imagens
+            if idx % 3 == 0 or idx == 1 or idx == total_count:
                 logging.info(
                     f"Processando imagem {idx}/{total_count}: {image_path.name} "
                     f"({original_size_mb:.1f} MB → {b64_size_kb:.0f} KB base64)"
                 )
-            
-            # Report progress to GUI if callback provided (every 3 images)
+            # Callback sempre na primeira, última e a cada 3 imagens
             if progress_callback and (current % 3 == 0 or current == 1 or current == total_count):
                 progress_callback(current, total_count, "Preparando imagens")
             

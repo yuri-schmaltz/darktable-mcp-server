@@ -1,0 +1,21 @@
+{
+  "app.title": "Darktable MCP",
+  "error.invalid_params": "Invalid parameters: {details}",
+  "error.prompt": "Prompt error: {details}",
+  "error.llm": "Language model error: {details}",
+  "error.unexpected": "Unexpected error: {details}",
+  "button.run": "Run",
+  "button.stop": "Stop",
+  "button.save": "Save",
+  "button.cancel": "Cancel",
+  "label.prompt": "Prompt",
+  "label.target_dir": "Export directory",
+  "label.model": "Model",
+  "label.collection": "Collection",
+  "label.progress": "Progress",
+  "msg.ready": "Ready.",
+  "msg.running": "Running...",
+  "msg.completed": "Completed.",
+  "msg.error": "Error: {details}",
+  "msg.success": "Success!"
+}
