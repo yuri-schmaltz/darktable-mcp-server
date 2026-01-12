@@ -43,6 +43,7 @@ class RunConfig:
     timeout: float = 600.0  # Default timeout
     download_model: Optional[str] = None
     generate_styles: bool = True
+        max_payload_mb: float = 12.0
     extra_flags: List[str] = field(default_factory=list)
 
     def build_command(self) -> List[str]:
@@ -77,6 +78,8 @@ class RunConfig:
             cmd += ["--target-dir", self.target_dir]
         if self.text_only:
             cmd.append("--text-only")
+            if self.max_payload_mb:
+                cmd += ["--max-payload-mb", str(self.max_payload_mb)]
         
         # Timeout (not strictly a CLI arg for host script if host script uses env var? 
         # Actually host script uses --timeout arg in modern version?)
@@ -167,6 +170,7 @@ def gather_config() -> RunConfig:
     text_only = not _ask_yes_no(
         "Anexar as imagens ao modelo (multimodal)?", default=True
     )
+        max_payload_mb = float(_ask_int("Payload máximo enviado ao LLM (MB)", 12))
 
     model_default = mcp_host_ollama.OLLAMA_MODEL
     model = _ask_optional_str(f"Modelo do LLM (default={model_default})")
@@ -208,6 +212,7 @@ def gather_config() -> RunConfig:
         prompt_variant=prompt_variant,
         text_only=text_only,
         extra_flags=extra_flags,
+            max_payload_mb=max_payload_mb,
     )
 
 

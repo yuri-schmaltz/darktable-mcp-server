@@ -122,7 +122,7 @@ class BatchProcessor:
         images = fetch_images(self.client, args)
         logging.info(f"[{mode}] Imagens filtradas: {len(images)}")
         if not images:
-            return None, None
+            return None, None, [], [], {}, 0.0
 
         sample = images[: args.limit]
         # Modular: carrega prompt via utilitário, com validação YAML
@@ -158,10 +158,26 @@ class BatchProcessor:
 
         messages = build_messages(system_prompt, sample, vision_images, self.provider_type)
         
-        # Calculate approximate payload size
+        # Calculate approximate payload size and guard upper bound
         import json as json_module
         payload_size_mb = len(json_module.dumps(messages)) / (1024 * 1024)
-        
+        max_payload_mb = getattr(args, "max_payload_mb", 12.0) or 12.0
+        if payload_size_mb > max_payload_mb and vision_images:
+            logging.warning(
+                {
+                    "event": "payload_too_large",
+                    "mode": mode,
+                    "payload_mb": round(payload_size_mb, 2),
+                    "max_mb": max_payload_mb,
+                    "images": len(vision_images),
+                }
+            )
+            # Fallback: desabilita envio de imagens para evitar OOM/timeout
+            vision_images = []
+            messages = build_messages(system_prompt, sample, vision_images, self.provider_type)
+            payload_size_mb = len(json_module.dumps(messages)) / (1024 * 1024)
+            logging.info(f"[{mode}] Reenviando como texto-only. Novo payload: {payload_size_mb:.1f} MB")
+
         logging.info(
             f"[{mode}] Enviando {len(vision_images)} imagem(ns) ao LLM ({self.provider.model}, payload: {payload_size_mb:.1f} MB)..."
         )
@@ -177,16 +193,19 @@ class BatchProcessor:
         log_file = save_log(mode, args.source, sample, answer, extra={"llm": meta})
         logging.info(f"[{mode}] Log: {log_file}")
         
-        return answer, log_file
+        return answer, log_file, sample, vision_images, meta, payload_size_mb
 
     def run_mode_rating(self, args):
         import time
         t0 = time.time()
         success = False
         error_msg = None
-        answer, _ = self._process_common("rating", args)
+        answer, _, sample, _, meta, payload_mb = self._process_common("rating", args)
         if not answer:
-            self._log_metric("rating", success=False, duration=time.time()-t0, extra={"error": "no_answer"})
+            self._log_metric(
+                "rating", success=False, duration=time.time()-t0,
+                extra={"error": "no_answer", "payload_mb": payload_mb}
+            )
             return
         try:
             json_str = extract_json_from_markdown(answer)
@@ -206,8 +225,8 @@ class BatchProcessor:
             print("[rating] Nenhuma edição.")
             self._log_metric("rating", success=True, duration=time.time()-t0, extra={"edits": 0})
             return
-        logging.info(f"[rating] {len(edits)} edições propostas:")
-        print(f"[rating] {len(edits)} edições propostas:")
+            logging.info(f"[rating] {len(edits)} edições propostas:")
+            print(f"[rating] {len(edits)} edições propostas:")
         for edit in edits:
             img_id = edit.get("id")
             new_rating = edit.get("rating")
@@ -236,6 +255,14 @@ class BatchProcessor:
             })
             self._log_metric("rating", success=False, duration=time.time()-t0, extra={"edits": len(edits), "error": error_msg})
             raise RuntimeError(f"Erro ao aplicar edits: {error_msg}") from e
+        else:
+            latency = meta.get("latency_ms") if isinstance(meta, dict) else None
+            self._log_metric(
+                "rating",
+                success=True,
+                duration=time.time()-t0,
+                extra={"edits": len(edits), "latency_ms": latency, "payload_mb": payload_mb}
+            )
 
     def _log_metric(self, mode, success, duration, extra=None):
         """Loga métrica simples em logs/metrics.json."""
@@ -275,8 +302,10 @@ class BatchProcessor:
             logging.error(f"Erro ao carregar prompt de tagging: {e}")
             print(f"[erro] Falha ao carregar prompt de tagging: {e}")
             return
-        answer, _ = self._process_common("tagging", args)
-        if not answer: return
+        answer, _, sample, _, meta, payload_mb = self._process_common("tagging", args)
+        if not answer:
+            self._log_metric("tagging", success=False, duration=0, extra={"error": "no_answer", "payload_mb": payload_mb})
+            return
         try:
             json_str = extract_json_from_markdown(answer)
             parsed = json.loads(json_str)
@@ -284,10 +313,12 @@ class BatchProcessor:
         except Exception as e:
             logging.error(f"[tagging] Erro JSON: {e}")
             print(f"[tagging] Erro JSON: {e}")
+            self._log_metric("tagging", success=False, duration=0, extra={"error": str(e)})
             return
         if self.dry_run:
             logging.info(f"[tagging] DRY-RUN. Tags: {tags}")
             print("[tagging] DRY-RUN. Tags:", tags)
+            self._log_metric("tagging", success=True, duration=0, extra={"tags": len(tags), "payload_mb": payload_mb, "latency_ms": meta.get("latency_ms") if isinstance(meta, dict) else None})
             return
         for entry in tags:
             tag = entry.get("tag")
@@ -304,6 +335,12 @@ class BatchProcessor:
                 if len(tagged_files) > 10:
                     logging.info(f"  ... e mais {len(tagged_files) - 10} foto(s)")
                     print(f"  ... e mais {len(tagged_files) - 10} foto(s)")
+        self._log_metric(
+            "tagging",
+            success=True,
+            duration=0,
+            extra={"tags": len(tags), "payload_mb": payload_mb, "latency_ms": meta.get("latency_ms") if isinstance(meta, dict) else None}
+        )
 
     def run_mode_export(self, args):
         # Modular: carrega prompt via utilitário, com validação YAML
@@ -317,7 +354,7 @@ class BatchProcessor:
         if not args.target_dir:
             print("[export] --target-dir obrigatório.")
             return
-        answer, log_file = self._process_common("export", args)
+        answer, log_file, _, _, meta, payload_mb = self._process_common("export", args)
         if not answer: return
         try:
             json_str = extract_json_from_markdown(answer)
@@ -333,6 +370,12 @@ class BatchProcessor:
         print("[export] Resultado:", res["content"][0]["text"])
         if log_file:
             append_export_result_to_log(log_file, res)
+        self._log_metric(
+            "export",
+            success=True,
+            duration=0,
+            extra={"ids": len(ids), "payload_mb": payload_mb, "latency_ms": meta.get("latency_ms") if isinstance(meta, dict) else None}
+        )
 
     def run_mode_tratamento(self, args):
         # Modular: carrega prompt via utilitário, com validação YAML
@@ -343,8 +386,10 @@ class BatchProcessor:
             logging.error(f"Erro ao carregar prompt de tratamento: {e}")
             print(f"[erro] Falha ao carregar prompt de tratamento: {e}")
             return
-        answer, _ = self._process_common("tratamento", args)
-        if not answer: return
+        answer, _, sample, _, meta, payload_mb = self._process_common("tratamento", args)
+        if not answer:
+            self._log_metric("tratamento", success=False, duration=0, extra={"error": "no_answer", "payload_mb": payload_mb})
+            return
         try:
             json_str = extract_json_from_markdown(answer)
             parsed = json.loads(json_str)
@@ -352,6 +397,7 @@ class BatchProcessor:
         except Exception as e:
             logging.error(f"[tratamento] Erro JSON: {e}")
             print(f"[tratamento] Erro JSON: {e}")
+            self._log_metric("tratamento", success=False, duration=0, extra={"error": str(e)})
             return
         if not treatments:
             logging.info("[tratamento] Nenhuma sugestão recebida.")
@@ -392,12 +438,19 @@ class BatchProcessor:
                     pass
             
             # Log suggestion
-            img_meta = next((img for img in (fetch_images(self.client, args) or []) if img.get("id") == tid), None)
+            img_meta = next((img for img in (sample or []) if img.get("id") == tid), None)
             name = img_meta.get("filename", f"ID {tid}") if img_meta else f"ID {tid}"
             notes = t.get("notes", "")
 
             logging.info(f"  • {name}: {', '.join(changes)}")
             print(f"  • {name}: {', '.join(changes)}")
+
+        self._log_metric(
+            "tratamento",
+            success=True,
+            duration=0,
+            extra={"treatments": len(treatments), "payload_mb": payload_mb, "latency_ms": meta.get("latency_ms") if isinstance(meta, dict) else None}
+        )
             if notes:
                 logging.info(f"    Sugestão: {notes}")
                 print(f"    Sugestão: {notes}")

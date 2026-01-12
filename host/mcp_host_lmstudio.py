@@ -54,6 +54,7 @@ def parse_args():
     p.add_argument("--text-only", action="store_true")
     p.add_argument("--prompt-file")
     p.add_argument("--prompt-variant", default="basico")
+    p.add_argument("--max-payload-mb", type=float, default=12.0, help="Limite máximo do payload enviado ao LLM")
     
     # Utils
     p.add_argument("--check-deps", action="store_true")

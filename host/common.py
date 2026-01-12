@@ -64,9 +64,14 @@ def setup_logging(verbose: bool = False, json_logging: bool = True):
     log_file = LOG_DIR / "mcp_host_debug.log"
     json_log_file = LOG_DIR / "mcp_host_structured.json"
     
+    base_level = logging.DEBUG if verbose else logging.INFO
+
     root_logger = logging.getLogger()
-    root_logger.setLevel(logging.DEBUG)  # Capture everything
-    
+    root_logger.setLevel(base_level)
+
+    # Reduce PIL verbosity to avoid log spam
+    logging.getLogger("PIL").setLevel(logging.WARNING)
+
     # Standard formatter for text logs
     file_fmt = logging.Formatter('%(asctime)s [%(levelname)s] %(name)s: %(message)s')
     console_fmt = logging.Formatter('[%(levelname)s] %(message)s')
@@ -75,7 +80,7 @@ def setup_logging(verbose: bool = False, json_logging: bool = True):
     file_handler = logging.handlers.RotatingFileHandler(
         log_file, maxBytes=5*1024*1024, backupCount=3, encoding='utf-8'
     )
-    file_handler.setLevel(logging.DEBUG)
+    file_handler.setLevel(base_level)
     file_handler.setFormatter(file_fmt)
     root_logger.addHandler(file_handler)
     
@@ -87,7 +92,7 @@ def setup_logging(verbose: bool = False, json_logging: bool = True):
             json_handler = logging.handlers.RotatingFileHandler(
                 json_log_file, maxBytes=5*1024*1024, backupCount=3, encoding='utf-8'
             )
-            json_handler.setLevel(logging.DEBUG)
+            json_handler.setLevel(base_level)
             json_fmt = jsonlogger.JsonFormatter(
                 '%(asctime)s %(levelname)s %(name)s %(message)s %(pathname)s %(lineno)d'
             )
